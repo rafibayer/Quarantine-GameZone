@@ -127,31 +127,10 @@ Specific session
 
 ## Use cases and priority:
 
-Priority
-	User
-	Description
-	P0
-	As a player
-	I want to be able to create a game and share it with friends
-	P0
-	As a player
-	I want to be able to join a created game
-	P0
-	As a player
-	I want to be able to play the game until I choose to leave or a winner is decided
-	P1
-	As a player
-	I want to be able to view leaderboards for each game
-	P2
-	As a player
-	I want to be able to chat with other players within a game
-	
-
-
-
-
+![Uses cases](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/priorities.JPG)
 
 ## Infrastructure diagram
 
+![Infrastructure](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/infrastructure.png)
 
 https://app.lucidchart.com/invitations/accept/ffb7c05e-ab8e-4cce-aa82-9e2046c505b6
