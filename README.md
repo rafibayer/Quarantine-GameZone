@@ -9,12 +9,12 @@ https://docs.google.com/document/d/11USZUFFNMCr2rI1_OYwn5Vvh6M2UfSBn8hGCUdOAKZw/
 
 
 
-# Project description
+## Project description
 Quarantine Game-Zone is an application that allows you to play games with others online via a web browser.
 Our target audience is anyone looking for a way to stay social by playing games, especially during quarantine. There are many other similar services, such as Jackbox, Drawful, and more, but we want to offer a free and easy-to-use alternative. As developers, we want to create an app that we could see ourselves using. As students experiencing this unprecedented online quarter, we think it’s more important than ever to stay connected, and games are a fantastic way to do that.
 
 
-# Endpoints
+## Endpoints
 Games lobby
    * /v1/games/
       * GET; Admin purposes, see all currently running games
@@ -125,7 +125,7 @@ Specific session
    * Score
 
 
-# Use cases and priority:
+## Use cases and priority:
 
 Priority
 	User
@@ -151,7 +151,7 @@ Priority
 
 
 
-# Infrastructure diagram
+## Infrastructure diagram
 
 
 https://app.lucidchart.com/invitations/accept/ffb7c05e-ab8e-4cce-aa82-9e2046c505b6
