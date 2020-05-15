@@ -100,7 +100,7 @@ Game: {
 		// this is specific to each game,  
 		// will contain information for client to render   gamestate  
 		// such as the board in tictactoe or chess based on   gameType  
-	// and for server to handle game  
+		// and for server to handle game  
 		// logic such as whose turn it is  
 	    }  
 }  
