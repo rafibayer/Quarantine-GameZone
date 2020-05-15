@@ -67,7 +67,7 @@ Our target audience is anyone looking for a way to stay social by playing games,
         - 200 ok: Ends session
 
 ## Models
-```json
+```
 Player: {  
 	id: int,  
 	username: string,  
