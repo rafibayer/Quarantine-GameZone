@@ -80,7 +80,7 @@ Player: {
 NewPlayer: {  
 	username: string,  
 	email: string,  
-    firstname: string,  
+        firstname: string,  
 	lastname: string,  
 	password: string,  
 	passwordConf: string  
@@ -93,16 +93,16 @@ Credentials: {
 
 
 Game: {  
-gameType: string,  
-lobbyID: string,  
-players: [playerID: int],  
-gamestate: {  
-	// this is specific to each game,  
-	// will contain information for client to render   gamestate  
-	// such as the board in tictactoe or chess based on   gameType  
-// and for server to handle game  
-	// logic such as whose turn it is  
-    }  
+	gameType: string,  
+	lobbyID: string,  
+	players: [playerID: int],  
+	gamestate: {  
+		// this is specific to each game,  
+		// will contain information for client to render   gamestate  
+		// such as the board in tictactoe or chess based on   gameType  
+	// and for server to handle game  
+		// logic such as whose turn it is  
+	    }  
 }  
 ```
 Use cases and priority:  
