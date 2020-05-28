@@ -1,4 +1,6 @@
 # Project: Quarantine Game-Zone
+Updated Spec: https://docs.google.com/document/d/1bTPSGdqWB-4usx5t92q-fA1jr879KetxZ58KjcKz6d4/edit?usp=sharing
+
 Group Members: Jill, Vivian, Rafael, & Amit
 
 
