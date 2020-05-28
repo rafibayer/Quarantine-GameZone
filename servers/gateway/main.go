@@ -3,6 +3,7 @@ package main
 import (
 	"Quarantine-GameZone-441/servers/gateway/handlers"
 	"Quarantine-GameZone-441/servers/gateway/sessions"
+	"encoding/json"
 
 	"errors"
 	"log"
@@ -38,7 +39,6 @@ func CustomDirector(targets []*url.URL, ctx *handlers.HandlerContext) Director {
 		xuser, err := getXUser(r, ctx)
 		// add X-user header if we could get the sessionState user
 		if err == nil {
-
 			r.Header.Set("X-user", xuser)
 		} else {
 			log.Printf("no auth: %v\n", err)
@@ -60,7 +60,19 @@ func getXUser(r *http.Request, ctx *handlers.HandlerContext) (string, error) {
 		return "INVALID", errors.New("Invalid session")
 	}
 
-	return string(sessID), nil
+	xUser := struct {
+		Nickname  string `json:"nickname"`
+		SessionID string `json:"sessionID"`
+	}{
+		sessState.Nickname,
+		sessID.String(),
+	}
+
+	xUserjson, err := json.Marshal(xUser)
+	if err != nil {
+		return "INVALID", errors.New("Invalid session")
+	}
+	return string(xUserjson), nil
 }
 
 //main is the main entry point for the server
