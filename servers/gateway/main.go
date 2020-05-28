@@ -46,6 +46,12 @@ func CustomDirector(targets []*url.URL, ctx *handlers.HandlerContext) Director {
 	}
 }
 
+// getXUser returns a string-encoded json object
+// containing the auth user in a request
+//  {
+//		nickname:  str,
+//		sessionID: str
+//  }
 func getXUser(r *http.Request, ctx *handlers.HandlerContext) (string, error) {
 
 	// check for incoming requests with x-user header
@@ -78,6 +84,7 @@ func getXUser(r *http.Request, ctx *handlers.HandlerContext) (string, error) {
 //main is the main entry point for the server
 func main() {
 
+	// if PROD variable is defined, deploy on https (intended for production)
 	localDeploy := len(os.Getenv("PROD")) == 0
 
 	// ===HTTPS=== //
@@ -139,8 +146,10 @@ func main() {
 
 	log.Printf("Server is listening at %s", addr)
 	if localDeploy {
+		log.Println("Deploying using HTTP for local development...")
 		log.Fatal(http.ListenAndServe(addr, wrappedMux))
 	} else {
+		log.Println("Deploying using HTTPS for production...")
 		log.Fatal(http.ListenAndServeTLS(addr, tlscert, tlskey, wrappedMux))
 
 	}

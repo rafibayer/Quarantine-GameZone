@@ -1,3 +1,5 @@
+echo "DEPLOYING LOCALLY"
+
 ./build.sh
 
 docker rm -f gamezone_gateway

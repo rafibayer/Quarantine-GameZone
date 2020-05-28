@@ -11,8 +11,8 @@ import (
 	"Quarantine-GameZone-441/servers/gateway/sessions"
 )
 
-// longest possible nickname
-const NICKNAME_LIMIT = 20
+// NicknameLimit is the longest possible nickname
+const NicknameLimit = 20
 
 func readerToString(reader io.ReadCloser) string {
 	buf := new(bytes.Buffer)
@@ -33,7 +33,7 @@ func (ctx *HandlerContext) SessionHandler(w http.ResponseWriter, r *http.Request
 
 		//parses the body for the nickname for the users session
 		nickname := strings.TrimSpace(readerToString(r.Body))
-		if len(nickname) == 0 || len(nickname) > NICKNAME_LIMIT {
+		if len(nickname) == 0 || len(nickname) > NicknameLimit {
 			http.Error(w, "Invalid nickname", http.StatusForbidden)
 			return
 		}
@@ -65,7 +65,7 @@ func (ctx *HandlerContext) SessionHandler(w http.ResponseWriter, r *http.Request
 func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodDelete {
 
-		//extracts the userID section of the URL which could either be a number or 'me'
+		// can only end your own session using "mine"
 		resource := r.URL.Path
 		id := path.Base(resource)
 
