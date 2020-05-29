@@ -1,1 +1,0 @@
-docker build -t viviancarolinehua/gamezone_client .
