@@ -1,4 +1,3 @@
-FROM alpine
-COPY client /client
-EXPOSE 3000
-ENTRYPOINT [ "/client" ]
+FROM nginx
+COPY build /usr/share/nginx/html
+ADD default.conf /etc/nginx/conf.d/default.conf

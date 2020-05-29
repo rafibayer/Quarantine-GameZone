@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import CreateNickname from './Components/CreateNickname.js'
 import Lobby from './Components/Lobby.js'
-//import PageTypes from './Constants/PageTypes.js'
-import api from './Constants/Endpoints.js';
+// import api from './Constants/Endpoints.js';
 
 import './App.css';
 
@@ -10,22 +9,22 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      //page: localStorage.getItem("Authorization") ? PageTypes.gameLobby : PageTypes.createNickname,
       authToken: localStorage.getItem("Authorization") || null,
       player: null
     };
-    this.getCurrentPlayer();
+    //this.getCurrentPlayer();
   }
 
   handleChange = (e) => {
     this.setState({ [e.target.name]: e.target.value});
   }
 
-  getCurrentPlayer = async () => {
+  // gets current player session from authorization header
+ /* getCurrentPlayer = async () => {
     if (!this.state.authToken) {
       return;
     }
-    const response = await fetch(api.testbase + api.handlers.myplayer, {
+    const response = await fetch(api.testbase + api.handlers.players, {
       headers: new Headers({
           "Authorization": this.state.authToken
       })
@@ -40,18 +39,14 @@ class App extends Component {
     const player = await response.json()
     this.setPlayer(player);
   }
-
-  /**
-   * @description sets auth token
-   */
+*/
+ 
+  // set auth token
   setAuthToken = (authToken) => {
-    //this.setState({ authToken, page: authToken === "" ? PageTypes.createNickname : PageTypes.gameLobby });
     this.setState(authToken);
   }
 
-  /**
-   * @description sets the players
-   */
+  // sets player
   setPlayer = (player) => {
       this.setState({ player });
   }
@@ -59,6 +54,7 @@ class App extends Component {
   render() {
     const { player } = this.state;
     return (
+      // return either create nickname page or lobby page depending if they have created a player session
       <div>
         {player ?  <Lobby /> : <CreateNickname />}
       </div>

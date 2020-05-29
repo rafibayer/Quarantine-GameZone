@@ -1,9 +1,8 @@
 export default {
     base: "https://tbd",
-    testbase: "https://localhost:4000",
+    testbase: "http://localhost:3000",
     handlers: {
-        players: "/v1/players",
-        myplayer: "/v1/players/me",
+        players: "/v1/sessions",
         games: "/v1/sessions"
     }
 }
