@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import CreateNickname from './Components/CreateNickname.js'
 import Lobby from './Components/Lobby.js'
-// import api from './Constants/Endpoints.js';
+import api from './Constants/Endpoints.js';
 
 import './App.css';
 
@@ -12,7 +12,11 @@ class App extends Component {
       authToken: localStorage.getItem("Authorization") || null,
       player: null
     };
-    //this.getCurrentPlayer();
+   // this.getCurrentPlayer();
+   
+   localStorage.setItem("Authorization", "");
+   this.setAuthToken("");
+   this.setPlayer(null);
   }
 
   handleChange = (e) => {
@@ -38,12 +42,11 @@ class App extends Component {
     }
     const player = await response.json()
     this.setPlayer(player);
-  }
-*/
+  }*/
  
   // set auth token
   setAuthToken = (authToken) => {
-    this.setState(authToken);
+    this.setState({ authToken });
   }
 
   // sets player
@@ -56,7 +59,7 @@ class App extends Component {
     return (
       // return either create nickname page or lobby page depending if they have created a player session
       <div>
-        {player ?  <Lobby /> : <CreateNickname />}
+        {player ?  <Lobby /> : <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
       </div>
     );
     
