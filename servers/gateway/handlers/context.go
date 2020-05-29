@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"Quarantine-GameZone-441/servers/gateway/gamesessions"
 	"Quarantine-GameZone-441/servers/gateway/sessions"
 )
 
@@ -10,7 +11,17 @@ type HandlerContext struct {
 	SessionStore sessions.Store
 }
 
+type GameHandlerContext struct {
+	SigningKey   string
+	SessionStore gamesessions.Store
+}
+
 // NewHandlerContext creates a new HandlerContext
 func NewHandlerContext(SigningKey string, SessionStore sessions.Store) *HandlerContext {
 	return &(HandlerContext{SigningKey, SessionStore})
+}
+
+// NewGameHandlerContext creates a new HandlerContext
+func NewGameHandlerContext(SigningKey string, SessionStore gamesessions.Store) *GameHandlerContext {
+	return &(GameHandlerContext{SigningKey, SessionStore})
 }
