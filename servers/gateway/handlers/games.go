@@ -27,7 +27,7 @@ type GameLobby struct {
 }
 
 //GameHandler handles request for making a gametype
-func (ctx *GameHandlerContext) GameHandler(w http.ResponseWriter, r *http.Request) {
+func (ctx *HandlerContext) GameHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
@@ -64,7 +64,7 @@ func (ctx *GameHandlerContext) GameHandler(w http.ResponseWriter, r *http.Reques
 			time.Now(),
 			gameLobby,
 		}
-		_, err = gamesessions.BeginGameSession(ctx.SigningKey, ctx.SessionStore, GameLobbyState, w)
+		_, err = gamesessions.BeginGameSession(ctx.SigningKey, ctx.GameSessionStore, GameLobbyState, w)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
@@ -84,4 +84,8 @@ func (ctx *GameHandlerContext) GameHandler(w http.ResponseWriter, r *http.Reques
 
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 	return
+}
+
+func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Request) {
+
 }

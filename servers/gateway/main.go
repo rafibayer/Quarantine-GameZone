@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Quarantine-GameZone-441/servers/gateway/gamesessions"
 	"Quarantine-GameZone-441/servers/gateway/handlers"
 	"Quarantine-GameZone-441/servers/gateway/sessions"
 	"encoding/json"
@@ -130,8 +131,9 @@ func main() {
 	defer client.Close()
 
 	sessionStore := sessions.NewRedisStore(client, time.Hour)
+	gameSessionStore := gamesessions.NewRedisStore(client, time.Hour)
 
-	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore)
+	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore)
 
 	// summaryProxy := &httputil.ReverseProxy{Director: CustomDirector(summaryAddresses, handlerContext)}
 	// messageProxy := &httputil.ReverseProxy{Director: CustomDirector(messageAddresses, handlerContext)}
@@ -140,6 +142,7 @@ func main() {
 
 	mux.HandleFunc("/v1/sessions", handlerContext.SessionHandler)
 	mux.HandleFunc("/v1/sessions/", handlerContext.SpecificSessionHandler)
+	mux.HandleFunc("v1/games", handlerContext.GameHandler)
 
 	// CORS middleware
 	wrappedMux := handlers.NewCorsHandler(mux)
