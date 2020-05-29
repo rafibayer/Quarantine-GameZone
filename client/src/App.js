@@ -9,14 +9,10 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      authToken: localStorage.getItem("Authorization") || null,
+      authToken: localStorage.getItem("Authorization") || "",
       player: null
     };
-   // this.getCurrentPlayer();
-   
-   localStorage.setItem("Authorization", "");
-   this.setAuthToken("");
-   this.setPlayer(null);
+   this.getCurrentPlayer();
   }
 
   handleChange = (e) => {
@@ -24,11 +20,11 @@ class App extends Component {
   }
 
   // gets current player session from authorization header
- /* getCurrentPlayer = async () => {
+  getCurrentPlayer = async () => {
     if (!this.state.authToken) {
       return;
     }
-    const response = await fetch(api.testbase + api.handlers.players, {
+    const response = await fetch(api.testbase + api.handlers.player, {
       headers: new Headers({
           "Authorization": this.state.authToken
       })
@@ -40,9 +36,9 @@ class App extends Component {
         this.setPlayer(null)
         return;
     }
-    const player = await response.json()
+    const player = await response.text()
     this.setPlayer(player);
-  }*/
+  }
  
   // set auth token
   setAuthToken = (authToken) => {
@@ -59,7 +55,7 @@ class App extends Component {
     return (
       // return either create nickname page or lobby page depending if they have created a player session
       <div>
-        {player ?  <Lobby /> : <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
+        {player ?  <Lobby playerNickname={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} /> : <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
       </div>
     );
     

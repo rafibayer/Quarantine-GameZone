@@ -3,6 +3,6 @@ export default {
     testbase: "http://localhost",
     handlers: {
         players: "/v1/sessions",
-        games: "/v1/sessions"
+        player: "/v1/sessions/mine"
     }
 }
