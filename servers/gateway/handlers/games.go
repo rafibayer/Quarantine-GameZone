@@ -83,7 +83,6 @@ func (ctx *HandlerContext) GameHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
-	return
 }
 
 //SpecificGameHandler handles request for a specific game session, currently we are supporting
@@ -108,7 +107,6 @@ func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Re
 	//this is meant to add a new player to the gamesession
 	if r.Method == http.MethodPost {
 
-		// // can only end your own session using "mine"
 		// resource := r.URL.Path
 		// GameID := path.Base(resource)
 
@@ -166,7 +164,43 @@ func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 		return
-	}
+		//this method will allow spectators potentially? only if you made a nickname and have a sessionID
+	} else if r.Method == http.MethodGet {
+		SessionState := SessionState{}
+		_, err := sessions.GetState(
+			r,
+			ctx.SigningKey,
+			ctx.SessionStore,
+			&SessionState,
+		)
+		if err != nil {
+			http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
+			return
+		}
 
-	http.Error(w, "Please provide a DELETE method", http.StatusMethodNotAllowed)
+		GameSessionState := GameLobbyState{}
+		_, err = gamesessions.GetGameState(
+			r,
+			ctx.SigningKey,
+			ctx.GameSessionStore,
+			&GameSessionState,
+		)
+		if err != nil {
+			http.Error(w, "game session doesn't exist", http.StatusUnauthorized)
+			return
+		}
+
+		gameLobby := GameSessionState.GameLobby
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		encoder := json.NewEncoder(w)
+		err = encoder.Encode(gameLobby)
+		if err != nil {
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+		return
+
+	}
+	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 }
