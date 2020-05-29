@@ -33,6 +33,12 @@ func BeginGameSession(signingKey string, store Store, GameLobbyState interface{}
 	return newGameSessionID, nil
 }
 
+//UpdateGameSession updates a currenty existing gameSessionID with a new player
+func UpdateGameSession(signingkey string, store Store, GameLobbyState interface{}, w http.ResponseWriter, gameSessionID GameSessionID) (GameSessionID, error) {
+	store.Save(gameSessionID, GameLobbyState)
+	return gameSessionID, nil
+}
+
 //GetGameSessionID extracts and validates the SessionID from the request headers
 func GetGameSessionID(r *http.Request, signingKey string) (GameSessionID, error) {
 
