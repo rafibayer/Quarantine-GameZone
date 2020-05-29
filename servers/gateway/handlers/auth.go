@@ -91,6 +91,30 @@ func (ctx *HandlerContext) SpecificSessionHandler(w http.ResponseWriter, r *http
 		w.Write([]byte("signed out"))
 		return
 	}
+	if r.Method == http.MethodGet {
+		// can only get your own session using "mine"
+		resource := r.URL.Path
+		id := path.Base(resource)
 
-	http.Error(w, "Please provide a DELETE method", http.StatusMethodNotAllowed)
+		//checks if the user is allowed to get this session
+		if id != "mine" {
+			http.Error(w, "This action is forbidden", http.StatusForbidden)
+			return
+		}
+
+		sessState := SessionState{}
+		_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, &sessState)
+		if err != nil {
+
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(sessState.Nickname))
+		return
+
+	}
+
+	http.Error(w, "Please provide a DELETE or GET method", http.StatusMethodNotAllowed)
 }
