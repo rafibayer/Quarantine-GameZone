@@ -3,12 +3,17 @@ package handlers
 import (
 	"Quarantine-GameZone-441/servers/gateway/gamesessions"
 	"Quarantine-GameZone-441/servers/gateway/sessions"
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"path"
 
 	"net/http"
 	"time"
 )
+
+//TODO: Make sure we never send back user tokens or any other sensitive info
+//	change it all to plain text repsonses later
 
 //NewGameLobby struct represents the state of a game lobby, this is created for every game
 type NewGameLobby struct {
@@ -24,10 +29,11 @@ type GameLobby struct {
 	Private  bool                       `json:"private"`
 	Players  []sessions.SessionID       `json:"players"`
 	Capacity int                        `json:"capacity"`
+	GameID   string                     `json:"gameID"`
 }
 
-//GameHandler handles request for making a gametype
-func (ctx *HandlerContext) GameHandler(w http.ResponseWriter, r *http.Request) {
+//LobbyHandler handles request for making a gametype
+func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
 
@@ -110,10 +116,10 @@ func (ctx *HandlerContext) GameHandler(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 }
 
-//SpecificGameHandler handles request for a specific game session, currently we are supporting
+//SpecificLobbyHandler handles request for a specific game session, currently we are supporting
 // a post request that adds a new player to the game session, this is currently done by sending the sessID
 // in the request body (maybe needs to change to getting the sessionID from autherization header)
-func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Request) {
+func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	GameSessionState := GameLobbyState{}
 	_, err := gamesessions.GetGameState(
@@ -184,6 +190,58 @@ func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Re
 			return
 		}
 
+		if len(gameLobby.Players) == gameLobby.Capacity {
+			//games.go -> gameHandler: body: [player auths]
+			// <- gamestate json + gameid (thats in redis)
+			// you store gameid in lobby
+			// <- client
+			requestBody, err := json.Marshal(gameLobby)
+			if err != nil {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			resp, err := http.Post("tictactoe:80", "application/json", bytes.NewBuffer(requestBody))
+			if err != nil {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			defer resp.Body.Close()
+
+			var result map[string]interface{}
+
+			json.NewDecoder(resp.Body).Decode(&result)
+
+			actualGameState := result["gamestate"]
+			gameID := result["gameid"]
+
+			strGameID := fmt.Sprintf("%v", gameID)
+
+			gameLobby.GameID = string(strGameID)
+			_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameSessionState, w, gameIDType)
+			if err != nil {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+
+			type Response struct {
+				GameID    string      `json:"game_id"`
+				Gamestate interface{} `json:"game_state"`
+			}
+
+			response := Response{strGameID, actualGameState}
+			//Responds back to the user with the updated user
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			encoder := json.NewEncoder(w)
+			err = encoder.Encode(response)
+			if err != nil {
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+		}
+
 		//Responds back to the user with the updated user
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
@@ -193,6 +251,7 @@ func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Re
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
+
 		return
 		//this method will allow spectators potentially? only if you made a nickname and have a sessionID
 	} else if r.Method == http.MethodGet {
@@ -236,3 +295,19 @@ func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Re
 	}
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 }
+
+// client -> header: auth, body: gametype...
+// redis<- new lobby
+// player joins
+//
+// games.go -> gameHandler: body: [player auths]
+// <- gamestate json + gameid (thats in redis)
+// you store gameid in lobby
+// <- client
+
+// client: lobbyid, gamestate (v1/games/lobbyid)
+// games.go: lobbyid(gameid)
+// tictactoe: gameid
+
+// client -> body: move, header: auth, url: lobbyid
+// redis[lobbyid]: lobby metadata gameid
