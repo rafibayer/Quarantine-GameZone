@@ -3,6 +3,7 @@ import gametypes from '../Constants/GameTypes.js'
 import api from '../Constants/Endpoints.js'
 import Errors from './Errors.js'
 
+// player creates a new game
 class CreateGame extends Component {
     constructor(props) {
         super(props);
@@ -14,9 +15,10 @@ class CreateGame extends Component {
         };
     }
 
+    // handles changes to private public radio buttons
     handleChange = (e) => {
         this.setState({
-            checked: e.target.value
+            is_private: !this.state.is_private
         });
     }
 

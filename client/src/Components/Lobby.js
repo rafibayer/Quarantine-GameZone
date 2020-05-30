@@ -15,7 +15,7 @@ class Lobby extends Component {
                 <h1>Hello {this.props.playerNickname}. Welcome to the Quarantine GameZone Lobby!</h1>
                 <ExitLobby setAuthToken={this.props.setAuthToken} setPlayer={this.props.setPlayer}></ExitLobby>
                 <CreateGame playerSession={this.props.playerSession}></CreateGame>
-                <JoinGame></JoinGame>
+                <JoinGame playSession={this.props.playerSession}></JoinGame>
             </div>
 
         );
