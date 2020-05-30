@@ -7,8 +7,7 @@ class JoinGame extends Component {
         super(props);
         this.state = {
             public_games: {},
-            error: "",
-            gameID: null
+            error: ""
         }
         //this.setPublicGames();
     }
@@ -26,9 +25,9 @@ class JoinGame extends Component {
     /*
     // gets recent public games for player to join
     getPublicGames = async () => {
-        const response = await fetch(api.testbase + api.handlers.games, {
+        const response = await fetch(api.testbase + api.handlers.lobbies, {
             headers: new Headers({
-                "Authorization": this.props.authToken
+                "Authorization": localStorage.getItem("Authorization")
             })
         });
         if (response.status >= 300) {
@@ -47,7 +46,7 @@ class JoinGame extends Component {
         const response = await fetch(api.testbase + api.handlers.game, {
             method: "POST",
             headers: new Headers({
-                "Authorization": this.props.authToken
+                "Authorization": localStorage.getItem("Authorization")
             })
         });
         if (response.status >= 300) {
@@ -56,14 +55,14 @@ class JoinGame extends Component {
             return;
         }
         this.props.setGameID(e.target.value);
-        this.props.setInGame();
+        this.props.setInGame(true);
     }
 
     render() {
         // get public games to display
        /* let displayPublicGames = [];
         Object.values(this.state.public_games).forEach((game) => { ;
-            displayPublicGames.push(<li>Game Type: {game.game_type} <button value={game.gameID} onClick={this.joinGame}>Join</button></li>);
+            displayPublicGames.push(<li>Game Type: {game.game_type} <button value={game.game_id} onClick={this.joinGame}>Join</button></li>);
         });*/
         const { error } = this.state;
         return(

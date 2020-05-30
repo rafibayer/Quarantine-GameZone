@@ -41,7 +41,7 @@ class CreateGame extends Component {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({
-                "Authorization": this.props.authToken,
+                "Authorization": localStorage.getItem("Authorization"),
                 "Content-Type": "application/json"
             })
         });
@@ -52,7 +52,7 @@ class CreateGame extends Component {
         }
         const newGame = await response.json();
         var getGameID = newGame.game_id;
-        this.props.setInGame();
+        this.props.setInGame(true);
         this.props.setGameID(getGameID);
     }
 
@@ -60,7 +60,7 @@ class CreateGame extends Component {
         // get display names and players for each game type
         let games = [];
         Object.values(gametypes).forEach((gameType) => {
-            games.push(<option value={gameType}>{gameType.displayName}</option>);
+            games.push(<option value={gameType.gameType}>{gameType.displayName}</option>);
         });
         const { error } = this.state;
         return(
