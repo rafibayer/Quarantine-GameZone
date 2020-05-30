@@ -22,23 +22,28 @@ type GameLobby struct {
 
 // Move holds information to make a move on a given game
 type Move struct {
-	Sid string `json:"sid"`
-	Row int    `json:"row"`
-	Col int    `json:"col"`
+	Sid      string `json:"sid"`
+	MoveData struct {
+		Row int `json:"row"`
+		Col int `json:"col"`
+	} `json:"movedata"`
 }
 
 const gameIDLength = 12
 
 // GameHandler is used to create new games of tic-tac-toe
 func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request) {
+	// Method POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "Please provide method POST", http.StatusMethodNotAllowed)
 	}
+	// content JSON
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "415: Request body must be application/json", http.StatusUnsupportedMediaType)
 		return
 	}
 
+	// Retrieve GameLobby from request
 	lobby := GameLobby{}
 	err := json.NewDecoder(r.Body).Decode(&lobby)
 	if err != nil {
@@ -132,7 +137,7 @@ func (gameStore *RedisStore) SpecificGameHandler(w http.ResponseWriter, r *http.
 	}
 
 	// Make move
-	err = game.Move(int(move.Row), int(move.Col), mover)
+	err = game.Move(int(move.MoveData.Row), int(move.MoveData.Col), mover)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusForbidden)
 		return
