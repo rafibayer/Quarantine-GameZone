@@ -1,9 +1,14 @@
 echo "DEPLOYING LOCALLY"
 
+cd ../games/tictactoe
 ./build.sh
+cd ../../gateway
+./build.sh
+
 
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
+docker rm -f gamezone_tictactoe
 
 export REDISADDR=gamezone_redis:6379
 export TLSKEY=LOCALDEPLOY
@@ -18,6 +23,13 @@ docker run -d \
 --name gamezone_redis \
 --network customNet \
 redis
+
+docker run -d \
+-e ADDR=:80 \
+-e REDISADDR=gamezone_redis:6379 \
+--name gamezone_tictactoe \
+--network customNet \
+rbayer/gamezone_tictactoe
 
 docker run -d -p 80:80 \
 -e ADDR=:80 \

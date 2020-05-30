@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"path"
 
 	"net/http"
@@ -186,6 +188,8 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 		gameLobby.Players = playersSlice
 		_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameSessionState, w, gameIDType)
 		if err != nil {
+			log.Println(err)
+
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -197,30 +201,43 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			// <- client
 			requestBody, err := json.Marshal(gameLobby)
 			if err != nil {
+				log.Println(err)
+
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
 
-			resp, err := http.Post("tictactoe:80", "application/json", bytes.NewBuffer(requestBody))
+			resp, err := http.Post(Endpoints[gameLobby.GameType], "application/json", bytes.NewBuffer(requestBody))
 			if err != nil {
+				log.Println(err)
+
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
 
-			defer resp.Body.Close()
+			respBytes, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Internal server error", http.StatusInternalServerError)
+				return
+			}
+			log.Printf("respbytes: %s", respBytes)
 
+			//var result map[string]interface{}
 			var result map[string]interface{}
 
-			json.NewDecoder(resp.Body).Decode(&result)
+			json.Unmarshal(respBytes, &result)
 
 			actualGameState := result["gamestate"]
 			gameID := result["gameid"]
 
 			strGameID := fmt.Sprintf("%v", gameID)
 
-			gameLobby.GameID = string(strGameID)
+			gameLobby.GameID = strGameID
 			_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameSessionState, w, gameIDType)
 			if err != nil {
+				log.Println(err)
+
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
@@ -237,9 +254,12 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			encoder := json.NewEncoder(w)
 			err = encoder.Encode(response)
 			if err != nil {
+				log.Println(err)
+
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
+			return
 		}
 
 		//Responds back to the user with the updated user
@@ -248,6 +268,8 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 		encoder := json.NewEncoder(w)
 		err = encoder.Encode(gameLobby)
 		if err != nil {
+			log.Println(err)
+
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -287,10 +309,11 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 		encoder := json.NewEncoder(w)
 		err = encoder.Encode(gameLobby)
 		if err != nil {
+			log.Println(err)
+
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
-		return
 
 	}
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
