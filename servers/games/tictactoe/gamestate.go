@@ -1,4 +1,4 @@
-package gamestate
+package main
 
 import (
 	"errors"
@@ -9,6 +9,9 @@ import (
 const empty = 0
 const x = 1
 const o = 2
+
+// InProgress :game outcome for game still being player
+const InProgress = "In-Progress"
 
 // TicTacToe struct holds gamestate information for a game of tic tac toe
 type TicTacToe struct {
@@ -31,7 +34,7 @@ func NewTicTacToe(xid string, oid string) *TicTacToe {
 		true,
 		xid,
 		oid,
-		"In-progress",
+		InProgress,
 	}
 }
 
@@ -71,7 +74,7 @@ func (game *TicTacToe) checkResult() string {
 	// check for remaining possible moves
 	for _, row := range game.Board {
 		if contains(row[:], empty) {
-			return "In-Progress"
+			return InProgress
 		}
 	}
 	return "Draw"
