@@ -29,7 +29,7 @@ class CreateGame extends Component {
 
     // set error message
     setError = (error) => {
-        this.setState({ error })
+        this.setState({ error });
     }
 
     // submit new game form
@@ -50,6 +50,10 @@ class CreateGame extends Component {
             this.setError(error);
             return;
         }
+        const newGame = await response.json();
+        var getGameID = newGame.game_id;
+        this.props.setInGame();
+        this.props.setGameID(getGameID);
     }
 
     render() {

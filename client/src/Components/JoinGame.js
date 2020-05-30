@@ -7,10 +7,13 @@ class JoinGame extends Component {
         super(props);
         this.state = {
             public_games: {},
-            error: ""
+            error: "",
+            gameID: null
         }
+        //this.setPublicGames();
     }
 
+    // sets public games
     setPublicGames = (games) => {
         this.setState({public_games: games})
     }
@@ -20,8 +23,9 @@ class JoinGame extends Component {
         this.setState({ error })
     }
 
+    /*
     // gets recent public games for player to join
-    getCurrentPlayer = async () => {
+    getPublicGames = async () => {
         const response = await fetch(api.testbase + api.handlers.games, {
             headers: new Headers({
                 "Authorization": this.props.authToken
@@ -35,20 +39,40 @@ class JoinGame extends Component {
         const games = await response.json();
         this.setPublicGames(games);
     }
+*/
+
+    // join game (post request to specific lobby handler)
+    joinGame = async (e) => {
+        e.preventDefault();
+        const response = await fetch(api.testbase + api.handlers.game, {
+            method: "POST",
+            headers: new Headers({
+                "Authorization": this.props.authToken
+            })
+        });
+        if (response.status >= 300) {
+            const error = await response.text();
+            this.setError(error);
+            return;
+        }
+        this.props.setGameID(e.target.value);
+        this.props.setInGame();
+    }
 
     render() {
         // get public games to display
-        let displayPublicGames = [];
+       /* let displayPublicGames = [];
         Object.values(this.state.public_games).forEach((game) => { ;
-            displayPublicGames.push(<li>{game.game_type}</li>);
-        });
+            displayPublicGames.push(<li>Game Type: {game.game_type} <button value={game.gameID} onClick={this.joinGame}>Join</button></li>);
+        });*/
         const { error } = this.state;
         return(
             <div>
                 <Errors error={error} setError={this.setError} />
                 <h1>Join a Public Game</h1>
-                <ul>{displayPublicGames}</ul>
+                <ul><li>placeholder until get all public games is ready</li></ul>
             </div>
+
         );
     }
 }
