@@ -29,7 +29,7 @@ docker run -d \
 -e REDISADDR=gamezone_redis:6379 \
 --name gamezone_tictactoe \
 --network customNet \
-rbayer/gamezone_tictactoe
+viviancarolinehua/gamezone_tictactoe
 
 docker run -d -p 80:80 \
 -e ADDR=:80 \

@@ -24,7 +24,7 @@ class JoinGame extends Component {
     getCurrentPlayer = async () => {
         const response = await fetch(api.testbase + api.handlers.games, {
             headers: new Headers({
-                "X-User": this.props.playerSession
+                "Authorization": this.props.authToken
             })
         });
         if (response.status >= 300) {

@@ -20,7 +20,7 @@ import (
 //NewGameLobby struct represents the state of a game lobby, this is created for every game
 type NewGameLobby struct {
 	GameType string               `json:"game_type"`
-	Private  bool                 `json:"private"`
+	Private  bool                 `json:"is_private"`
 	Players  []sessions.SessionID `json:"players"`
 }
 
@@ -28,7 +28,7 @@ type NewGameLobby struct {
 type GameLobby struct {
 	ID       gamesessions.GameSessionID `json:"game_id"`
 	GameType string                     `json:"game_type"`
-	Private  bool                       `json:"is_private"`
+	Private  bool                       `json:"private"`
 	Players  []sessions.SessionID       `json:"players"`
 	Capacity int                        `json:"capacity"`
 	GameID   string                     `json:"gameID"`

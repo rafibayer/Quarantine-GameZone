@@ -8,9 +8,9 @@ class CreateGame extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            game_type: "",
+            game_type: "tictactoe",
             is_private: false,
-            players: [this.props.playerSession],
+            players: [this.props.authToken],
             error: ""
         };
     }
@@ -20,6 +20,11 @@ class CreateGame extends Component {
         this.setState({
             is_private: !this.state.is_private
         });
+    }
+
+    // handles select change
+    handleSelect = (e) => {
+        this.setState({game_type: e.target.value});
     }
 
     // set error message
@@ -36,6 +41,7 @@ class CreateGame extends Component {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({
+                "Authorization": this.props.authToken,
                 "Content-Type": "application/json"
             })
         });
@@ -49,7 +55,7 @@ class CreateGame extends Component {
     render() {
         // get display names and players for each game type
         let games = [];
-        Object.values(gametypes).forEach((gameType) => { ;
+        Object.values(gametypes).forEach((gameType) => {
             games.push(<option value={gameType}>{gameType.displayName}</option>);
         });
         const { error } = this.state;
@@ -63,11 +69,11 @@ class CreateGame extends Component {
                         <label for="public">Public</label>
                         <input type="radio" id="private" name="publicgame" value="private" checked={this.state.private} onChange={this.handleChange}></input>
                         <label for="private">Private</label>
-                        <select>
+                        <select defaultValue={this.state.game_type} onChange={this.handleSelect}>
                             {games}
                         </select>
                     </div>
-                    <input type="submit" value="Create Game" onSubmit={this.submitForm} />
+                    <input type="submit" value="Create Game" onClick={this.submitForm} />
                 </form>
             </div>
         );
