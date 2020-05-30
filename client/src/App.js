@@ -55,7 +55,7 @@ class App extends Component {
     return (
       // return either create nickname page or lobby page depending if they have created a player session
       <div>
-        {player ?  <Lobby playerNickname={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} /> : <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
+        {player ?  <Lobby playerSession={this.state.authToken} playerNickname={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} /> : <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
       </div>
     );
     

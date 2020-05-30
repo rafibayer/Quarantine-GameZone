@@ -21,7 +21,7 @@ type NewGameLobby struct {
 type GameLobby struct {
 	ID       gamesessions.GameSessionID `json:"game_id"`
 	GameType string                     `json:"game_type"`
-	Private  bool                       `json:"private"`
+	Private  bool                       `json:"is_private"`
 	Players  []sessions.SessionID       `json:"players"`
 	Capacity int                        `json:"capacity"`
 }

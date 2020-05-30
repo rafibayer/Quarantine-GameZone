@@ -10,7 +10,6 @@ class ExitLobby extends Component {
         };
     }
 
-
     // set error message
     setError = (error) => {
         this.setState({ error })

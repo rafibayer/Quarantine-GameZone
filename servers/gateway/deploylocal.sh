@@ -27,7 +27,7 @@ docker run -d -p 80:80 \
 -e SESSIONKEY=$SESSKEY \
 --name gamezone_gateway \
 --network customNet \
-rbayer/gamezone_gateway
+viviancarolinehua/gamezone_gateway
 
 docker logs gamezone_gateway
 
