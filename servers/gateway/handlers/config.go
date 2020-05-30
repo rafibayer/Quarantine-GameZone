@@ -6,7 +6,7 @@ var Endpoints = map[string]string{
 	"tictactoe": "http://gamezone_tictactoe:80/v1/tictactoe",
 }
 
-var GameCapacity = map[string]string{
+var GameCapacity = map[string]int{
 	"tictactoe": 2,
 	"trivia":    4,
 }

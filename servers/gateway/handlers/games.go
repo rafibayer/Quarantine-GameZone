@@ -36,7 +36,7 @@ type NewGameLobby struct {
 //ResponseGameLobby struct represents the state of the lobby that is sent to the client, with no session IDs
 // instead the usern nicknames are stored
 type ResponseGameLobby struct {
-	LobbyID  gamesessions.GameSessionID `json:"lobby_id"`
+	ID       gamesessions.GameSessionID `json:"lobby_id"`
 	GameType string                     `json:"game_type"`
 	Private  bool                       `json:"private"`
 	Players  []string                   `json:"players"`
@@ -55,7 +55,7 @@ func (ctx *HandlerContext) convertToResponseLobbyForClient(gameLobby GameLobby) 
 		}
 		nicknames = append(nicknames, playerSessionState.Nickname)
 	}
-	gameLobbyResponse.LobbyID = gameLobby.ID
+	gameLobbyResponse.ID = gameLobby.ID
 	gameLobbyResponse.GameType = gameLobby.GameType
 	gameLobbyResponse.Private = gameLobby.Private
 	gameLobbyResponse.Capacity = gameLobby.Capacity
@@ -85,7 +85,7 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 
 		//TODO: append to session the new player
 		SessionState := SessionState{}
-		playerSessID, err = sessions.GetState(
+		playerSessID, err := sessions.GetState(
 			r,
 			ctx.SigningKey,
 			ctx.SessionStore,
@@ -95,12 +95,12 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
 			return
 		}
-		playersSlice := gameLobby.Players[:]
+		playersSlice := make([]sessions.SessionID, 0)
 		playersSlice = append(playersSlice, playerSessID)
 
 		//create official game lobby
 		gameLobby := &GameLobby{}
-		if gameCapacity := GameCapacity[newGameLobby.GameType]; gameCapacity {
+		if gameCapacity, OK := GameCapacity[newGameLobby.GameType]; OK {
 			gameLobby.GameType = newGameLobby.GameType
 			gameLobby.Private = newGameLobby.Private
 			gameLobby.Capacity = gameCapacity
@@ -121,14 +121,14 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 		}
 
 		//TODO: this creates a bug because the new gamesessionID is never stored in redis properly
-		GameLobbyState.GameLobby.LobbyID = newGameSessionID
+		GameLobbyState.GameLobby.ID = newGameSessionID
 		_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameLobbyState, w, newGameSessionID)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
-		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(GameLobbyState.GameLobby)
+		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(*GameLobbyState.GameLobby)
 		if err != nil {
 			http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
 			return
@@ -299,7 +299,7 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			}
 			return
 		}
-		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(GameLobby)
+		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(*gameLobby)
 		if err != nil {
 			http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
 			return
@@ -363,7 +363,7 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			return
 		}
 
-		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(GameLobby)
+		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(*gameLobby)
 		if err != nil {
 			http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
 			return
