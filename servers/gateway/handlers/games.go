@@ -17,13 +17,6 @@ import (
 //TODO: Make sure we never send back user tokens or any other sensitive info
 //	change it all to plain text repsonses later
 
-//NewGameLobby struct represents the state of a game lobby, this is created for every game
-type NewGameLobby struct {
-	GameType string               `json:"game_type"`
-	Private  bool                 `json:"private"`
-	Players  []sessions.SessionID `json:"players"`
-}
-
 //GameLobby struct represents the state of a game lobby, this is created for every game
 type GameLobby struct {
 	ID       gamesessions.GameSessionID `json:"game_id"`
@@ -34,17 +27,53 @@ type GameLobby struct {
 	GameID   string                     `json:"gameID"`
 }
 
+//NewGameLobby struct represents the state of a game lobby, this is created for every game
+type NewGameLobby struct {
+	GameType string `json:"game_type"`
+	Private  bool   `json:"private"`
+}
+
+//ResponseGameLobby struct represents the state of the lobby that is sent to the client, with no session IDs
+// instead the usern nicknames are stored
+type ResponseGameLobby struct {
+	LobbyID  gamesessions.GameSessionID `json:"lobby_id"`
+	GameType string                     `json:"game_type"`
+	Private  bool                       `json:"private"`
+	Players  []string                   `json:"players"`
+	Capacity int                        `json:"capacity"`
+	GameID   string                     `json:"gameID"`
+}
+
+func (ctx *HandlerContext) convertToResponseLobbyForClient(gameLobby GameLobby) (*ResponseGameLobby, error) {
+	nicknames := make([]string, 0)
+	gameLobbyResponse := &ResponseGameLobby{}
+	for _, player := range gameLobby.Players {
+		playerSessionState := &SessionState{}
+		err := ctx.SessionStore.Get(player, playerSessionState)
+		if err != nil {
+			return nil, err
+		}
+		nicknames = append(nicknames, playerSessionState.Nickname)
+	}
+	gameLobbyResponse.LobbyID = gameLobby.ID
+	gameLobbyResponse.GameType = gameLobby.GameType
+	gameLobbyResponse.Private = gameLobby.Private
+	gameLobbyResponse.Capacity = gameLobby.Capacity
+	gameLobbyResponse.GameID = gameLobby.GameID
+	gameLobbyResponse.Players = nicknames
+	return gameLobbyResponse, nil
+}
+
 //LobbyHandler handles request for making a gametype
 func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
-
 		if r.Header.Get("Content-Type") != "application/json" {
 			http.Error(w, "415: Request body must be application/json", http.StatusUnsupportedMediaType)
 			return
 		}
 
-		// decode request body into NewUser
+		// decode request body into a new gamelobby
 		decoder := json.NewDecoder(r.Body)
 		var newGameLobby NewGameLobby
 		gameLobbyPointer := &newGameLobby
@@ -54,22 +83,9 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
-		//create official game lobby, this will be changed to be check infront of an intnal
-		// json map, I hardcoded for now
-		gameLobby := &GameLobby{}
-		if newGameLobby.GameType == "tictactoe" {
-			gameLobby.GameType = newGameLobby.GameType
-			gameLobby.Private = newGameLobby.Private
-			gameLobby.Players = newGameLobby.Players
-			gameLobby.Capacity = 2
-		} else {
-			http.Error(w, "we only support tictactoe right now", http.StatusBadRequest)
-			return
-		}
-
 		//TODO: append to session the new player
 		SessionState := SessionState{}
-		newPlayerSessionID, err := sessions.GetState(
+		playerSessID, err = sessions.GetState(
 			r,
 			ctx.SigningKey,
 			ctx.SessionStore,
@@ -79,11 +95,20 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
 			return
 		}
-		playersSlice := gameLobby.Players[:len(gameLobby.Players)]
-		playersSlice = append(playersSlice, newPlayerSessionID)
+		playersSlice := gameLobby.Players[:]
+		playersSlice = append(playersSlice, playerSessID)
 
-		gameLobby.Players = playersSlice
-
+		//create official game lobby
+		gameLobby := &GameLobby{}
+		if gameCapacity := GameCapacity[newGameLobby.GameType]; gameCapacity {
+			gameLobby.GameType = newGameLobby.GameType
+			gameLobby.Private = newGameLobby.Private
+			gameLobby.Capacity = gameCapacity
+			gameLobby.Players = playersSlice
+		} else {
+			http.Error(w, fmt.Sprintf("we currently dont support the game: %s", newGameLobby.GameType), http.StatusBadRequest)
+			return
+		}
 		//begins a session
 		GameLobbyState := GameLobbyState{
 			time.Now(),
@@ -96,10 +121,16 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 		}
 
 		//TODO: this creates a bug because the new gamesessionID is never stored in redis properly
-		GameLobbyState.GameLobby.ID = newGameSessionID
+		GameLobbyState.GameLobby.LobbyID = newGameSessionID
 		_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameLobbyState, w, newGameSessionID)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
+		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(GameLobbyState.GameLobby)
+		if err != nil {
+			http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
 			return
 		}
 
@@ -107,13 +138,31 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		encoder := json.NewEncoder(w)
-		err = encoder.Encode(gameLobby)
+		err = encoder.Encode(ResponseGameLobby)
 		if err != nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 		return
 	}
+	// }
+	//  }
+	//else if r.Method == http.MethodGet {
+	// 	SessionState := SessionState{}
+	// 	_, err := sessions.GetState(
+	// 		r,
+	// 		ctx.SigningKey,
+	// 		ctx.SessionStore,
+	// 		&SessionState,
+	// 	)
+
+	// 	if err != nil {
+	// 		http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
+	// 		return
+	// 	}
+
+	// 	//get all games in redis
+	// }
 
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 }
@@ -142,16 +191,6 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 		resource := r.URL.Path
 		gameID := path.Base(resource)
 		gameIDType := gamesessions.GameSessionID(gameID)
-
-		//extracts the new session ID from the request body, we will either do this or get it from the auth
-		// var newPlayerSessionID sessions.SessionID
-		// decoder := json.NewDecoder(r.Body)
-		// err := decoder.Decode(&newPlayerSessionID)
-
-		// if err != nil {
-		// 	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		// 	return
-		// }
 
 		//TODO: potentially extract the userID from the autherization header
 		//creates an empty sessionstate and fills it up based of if the user exists
@@ -237,7 +276,6 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameSessionState, w, gameIDType)
 			if err != nil {
 				log.Println(err)
-
 				http.Error(w, "Internal server error", http.StatusInternalServerError)
 				return
 			}
@@ -261,15 +299,19 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			}
 			return
 		}
+		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(GameLobby)
+		if err != nil {
+			http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
+			return
+		}
 
 		//Responds back to the user with the updated user
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 		encoder := json.NewEncoder(w)
-		err = encoder.Encode(gameLobby)
+		err = encoder.Encode(ResponseGameLobby)
 		if err != nil {
 			log.Println(err)
-
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -278,7 +320,7 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 		//this method will allow spectators potentially? only if you made a nickname and have a sessionID
 	} else if r.Method == http.MethodGet {
 		SessionState := SessionState{}
-		_, err := sessions.GetState(
+		playerSessionID, err := sessions.GetState(
 			r,
 			ctx.SigningKey,
 			ctx.SessionStore,
@@ -300,20 +342,86 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 			http.Error(w, "game session doesn't exist", http.StatusUnauthorized)
 			return
 		}
+		gameLobby = GameSessionState.GameLobby
 
-		//TODO: check if private, only allow current players to view game then
+		//check if game is private, if it is then only response with struct if player is a current game player
+		if GameSessionState.GameLobby.Private {
+			for _, player := range GameSessionState.GameLobby.Players {
+				if player == playerSessionID {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusOK)
+					encoder := json.NewEncoder(w)
+					err = encoder.Encode(gameLobby)
+					if err != nil {
+						log.Println(err)
+						http.Error(w, "Internal server error", http.StatusInternalServerError)
+						return
+					}
+				}
+			}
+			http.Error(w, "This game is private, you must be a current player to view it", http.StatusUnauthorized)
+			return
+		}
 
-		gameLobby := GameSessionState.GameLobby
+		ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(GameLobby)
+		if err != nil {
+			http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
+			return
+		}
+
+		//gameLobby := GameSessionState.GameLobby
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		encoder := json.NewEncoder(w)
-		err = encoder.Encode(gameLobby)
+		err = encoder.Encode(ResponseGameLobby)
 		if err != nil {
 			log.Println(err)
-
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
+		// } else if r.Method = http.MethodPatch {
+
+		// 	SessionState := SessionState{}
+		// 	_, err := sessions.GetState(
+		// 		r,
+		// 		ctx.SigningKey,
+		// 		ctx.SessionStore,
+		// 		&SessionState,
+		// 	)
+		// 	if err != nil {
+		// 		http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
+		// 		return
+		// 	}
+
+		// 	LobbySessionState := GameLobbyState{}
+		// 	_, err = gamesessions.GetGameState(
+		// 		r,
+		// 		ctx.SigningKey,
+		// 		ctx.GameSessionStore,
+		// 		&GameSessionState,
+		// 	)
+		// 	if err != nil {
+		// 		http.Error(w, "lobby session doesn't exist", http.StatusUnauthorized)
+		// 		return
+		// 	}
+
+		// 	gameID := LobbySessionState.GameID
+		// 	if len(gameID) == 0 || gameID == nil {
+		// 		http.Error(w, "game session doesn't exist", http.StatusUnauthorized)
+		// 		return
+		// 	}
+
+		// 	playerExists := false
+		// 	for _, player := range LobbySessionState.GameLobby.Players {
+		// 		if SessionState.Nickname == player {
+		// 			playerExists = true
+		// 		}
+		// 	}
+
+		// 	if (playerExists) {
+		// 		reqEndPoint = Endpoints[LobbySessionState.gameLobby.GameType] + gameID
+		// 		resp, err := http.Patch(Endpoints[LobbySessionState.gameLobby.GameType] + ga, r.Header.Get("Content-Type"), bytes.NewBuffer(r.Body))
+		// 	}
 
 	}
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
@@ -332,5 +440,27 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 // games.go: lobbyid(gameid)
 // tictactoe: gameid
 
-// client -> body: move, header: auth, url: lobbyid
+// client -> body: move, header: auth, url: gameid
+// send to microservice: body: (move, nickname), url: v1/gametype/gameID
 // redis[lobbyid]: lobby metadata gameid
+
+// /v1/gamelobby/lobbyid
+// post
+// all lobby changes (addingplayer)	-> creates a game (lets client know) ->
+// -> client now knows to send get specific game /v1/game/lobbyid(Get) (start loop)
+// get
+// gets the specific lobby state
+// patch
+// removes players -> if 0 players, lobby deletes
+
+// /v1/game/lobbyid
+// post
+//all gamestate changes (making a move)
+// get
+//gets the specific game state
+
+// /v1/gamelobby
+// post
+// makes a lobby
+// get
+// gets all public games (lobby states)

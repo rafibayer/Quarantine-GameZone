@@ -5,3 +5,8 @@ package handlers
 var Endpoints = map[string]string{
 	"tictactoe": "http://gamezone_tictactoe:80/v1/tictactoe",
 }
+
+var GameCapacity = map[string]string{
+	"tictactoe": 2,
+	"trivia":    4,
+}
