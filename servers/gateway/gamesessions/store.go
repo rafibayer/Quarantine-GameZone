@@ -25,4 +25,7 @@ type Store interface {
 
 	//Delete deletes all state data associated with the SessionID from the store.
 	Delete(gid GameSessionID) error
+
+	// GetAll returns all state data with a given prefix
+	GetAll(GameLobbyStates []interface{}) error
 }

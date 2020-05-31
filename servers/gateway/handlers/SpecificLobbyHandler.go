@@ -91,6 +91,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 		result, err := activateGame(gameLobby)
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
 		}
 
 		gameLobby.GameID = fmt.Sprintf("%v", result["gameid"])
@@ -109,6 +110,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 	//Responds back to the user with the updated user
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	log.Printf("Returning lobby to client: %+v", *gameLobby)
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(ResponseGameLobby)
 	if err != nil {
@@ -117,7 +119,6 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 		return
 	}
 
-	return
 }
 
 func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *http.Request) {
