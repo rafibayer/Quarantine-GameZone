@@ -104,18 +104,13 @@ func EndGameSession(r *http.Request, signingKey string, store Store) (GameSessio
 }
 
 // GetAllSessions returns a slice of all public GameLobby
-func GetAllSessions(signingKey string, store Store, GameLobbyState []interface{}) error {
+func GetAllSessions(signingKey string, store Store, GameLobbyStates map[string]string) (map[string]string, error) {
 
-	err := store.GetAll(GameLobbyState)
+	res, err := store.GetAll(GameLobbyStates)
 	if err != nil {
-		log.Println("error occuring in line 111, gamesession in getting all sessions")
-		log.Println(err.Error())
-		return err
+		return nil, err
 	}
 
-	log.Println("inside game sessions line 116")
-	log.Print(GameLobbyState)
-
-	return nil
+	return res, nil
 
 }
