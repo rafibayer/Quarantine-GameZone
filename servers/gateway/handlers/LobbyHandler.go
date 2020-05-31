@@ -5,6 +5,7 @@ import (
 	"Quarantine-GameZone-441/servers/gateway/sessions"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -89,5 +90,39 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	//get all games in redis
+	gameLobbyStates := make([]interface{}, 0)
+	err = gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
+	if err != nil {
+		http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
+		return
+	}
+
+	// make list of public lobbies
+	resultLobbies := make([]ResponseGameLobby, 0)
+	for _, stateInterface := range gameLobbyStates {
+		lobbyState, ok := stateInterface.(GameLobbyState) // Cast interface into concrete type
+		if !ok {
+			log.Println("Error casting interface into GameLobbyState")
+			http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
+			return
+		}
+		if !lobbyState.GameLobby.Private {
+			lobby, err := ctx.convertToResponseLobbyForClient(*lobbyState.GameLobby)
+			if err != nil {
+				http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
+				return
+			}
+			resultLobbies = append(resultLobbies, *lobby)
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(resultLobbies)
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 }

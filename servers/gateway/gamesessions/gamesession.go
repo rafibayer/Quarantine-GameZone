@@ -35,7 +35,11 @@ func BeginGameSession(signingKey string, store Store, GameLobbyState interface{}
 
 //UpdateGameSession updates a currenty existing gameSessionID with a new player
 func UpdateGameSession(signingkey string, store Store, GameLobbyState interface{}, w http.ResponseWriter, gameSessionID GameSessionID) (GameSessionID, error) {
-	store.Save(gameSessionID, GameLobbyState)
+	err := store.Save(gameSessionID, GameLobbyState)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return InvalidGameSessionID, err
+	}
 	return gameSessionID, nil
 }
 
@@ -96,5 +100,18 @@ func EndGameSession(r *http.Request, signingKey string, store Store) (GameSessio
 		return InvalidGameSessionID, ErrStateNotFound
 	}
 	return sessID, nil
+
+}
+
+// GetAllSessions returns a slice of all public GameLobby
+func GetAllSessions(signingKey string, store Store, GameLobbyState []interface{}) error {
+
+	err := store.GetAll(GameLobbyState)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	return nil
 
 }

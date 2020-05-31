@@ -90,6 +90,44 @@ func (rs *RedisStore) Delete(sid GameSessionID) error {
 	return nil
 }
 
+// GetAll returns all state data
+func (rs *RedisStore) GetAll(GameLobbyStates []interface{}) error {
+	// get all keys with prefix
+	keys, err := rs.Client.Keys("lid:").Result()
+	if err != nil {
+		return err
+	}
+
+	pipe := rs.Client.Pipeline()
+
+	results := make([]*redis.StringCmd, 0)
+
+	// get all values for those keys
+	for _, key := range keys {
+		results = append(results, rs.Client.Get(key))
+	}
+
+	_, err = pipe.Exec()
+	if err != nil {
+		return err
+	}
+
+	// Unmarshal and append to interface
+	for _, val := range results {
+		var lobby interface{}
+
+		bytes, err := val.Bytes()
+		if err != nil {
+			return err
+		}
+
+		GameLobbyStates = append(GameLobbyStates, json.Unmarshal(bytes, lobby))
+	}
+
+	return nil
+
+}
+
 //getRedisKey() returns the redis key to use for the SessionID
 func (gid GameSessionID) getRedisKey() string {
 	//convert the SessionID to a string and add the prefix "sid:" to keep

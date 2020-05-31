@@ -58,15 +58,19 @@ func (ctx *HandlerContext) convertToResponseLobbyForClient(gameLobby GameLobby) 
 	return gameLobbyResponse, nil
 }
 
+// LobbyHandler is used to create new lobbies using POST as well as get a list
+// of all public lobbies using GET
 func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
+
+	switch r.Method {
+	case http.MethodPost:
 		ctx.LobbyHandlerPost(w, r)
 		return
-	}
-	if r.Method == http.MethodGet {
+	case http.MethodGet:
 		ctx.LobbyHandlerGet(w, r)
 		return
 	}
+
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 
 }
@@ -76,22 +80,31 @@ func (ctx *HandlerContext) LobbyHandler(w http.ResponseWriter, r *http.Request) 
 // in the request body (maybe needs to change to getting the sessionID from autherization header)
 func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.Request) {
 
-	GameSessionState := GameLobbyState{}
-	_, err := gamesessions.GetGameState(r, ctx.SigningKey, ctx.GameSessionStore, &GameSessionState)
-	if err != nil {
-		http.Error(w, "game session doesn't exist", http.StatusUnauthorized)
-		return
-	}
-
-	//this is meant to add a new player to the gamesession
-	if r.Method == http.MethodPost {
+	switch r.Method {
+	case http.MethodPost:
 		ctx.SpecificLobbyHandlerPost(w, r)
 		return
-
-	} else if r.Method == http.MethodGet {
+	case http.MethodGet:
 		ctx.SpecificLobbyHandlerGet(w, r)
 		return
 	}
+
+	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
+}
+
+// SpecificGameHandler is used to modify and retrieve the state of a game
+// within an active lobby using POST and GET respectively
+func (ctx *HandlerContext) SpecificGameHandler(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodPost:
+		ctx.SpecificGameHandlerPost(w, r)
+		return
+	case http.MethodGet:
+		ctx.SpecificGameHandlerGet(w, r)
+		return
+	}
+
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)
 }
 

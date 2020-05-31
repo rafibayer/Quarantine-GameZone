@@ -144,7 +144,7 @@ func main() {
 	mux.HandleFunc("/v1/sessions/", handlerContext.SpecificSessionHandler)
 	mux.HandleFunc("/v1/gamelobby", handlerContext.LobbyHandler)
 	mux.HandleFunc("/v1/gamelobby/", handlerContext.SpecificLobbyHandler)
-	// mux.HandleFunc("/v1/games/", handlerContext.SpecificGameHandler)
+	mux.HandleFunc("/v1/games/", handlerContext.SpecificGameHandler)
 
 	// CORS middleware
 	wrappedMux := handlers.NewCorsHandler(mux)
