@@ -1,7 +1,7 @@
 echo "DEPLOYING LOCALLY"
 
 cd ../games/tictactoe
-./build.sh
+./buildamit.sh
 cd ../../gateway
 ./buildamit.sh
 

@@ -2,6 +2,7 @@ package gamesessions
 
 import (
 	"encoding/json"
+	"log"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -14,6 +15,8 @@ type RedisStore struct {
 	//Used for key expiry time on redis.
 	SessionDuration time.Duration
 }
+
+const hash string = "hash"
 
 //NewRedisStore constructs a new RedisStore
 func NewRedisStore(client *redis.Client, sessionDuration time.Duration) *RedisStore {
@@ -40,7 +43,7 @@ func (rs *RedisStore) Save(sid GameSessionID, GameLobbyState interface{}) error 
 
 	// save the session id and state in the redis store
 	rs.Client.Set(sid.getRedisKey(), json, rs.SessionDuration)
-
+	//rs.Client.HSet(hash, sid.getRedisKey(), json)
 	return nil
 }
 
@@ -92,11 +95,24 @@ func (rs *RedisStore) Delete(sid GameSessionID) error {
 
 // GetAll returns all state data
 func (rs *RedisStore) GetAll(GameLobbyStates []interface{}) error {
-	// get all keys with prefix
-	keys, err := rs.Client.Keys("lid:").Result()
+	//get all keys with prefix
+	keys, err := rs.Client.Keys("lid:*").Result()
 	if err != nil {
 		return err
 	}
+
+	// values := rs.Client.HGetAll(hash)
+	// results := make([]*redis.StringCmd, 0)
+	// var lobby interface{}
+	// err := json.Unmarshal(values.Bytes(), lobby)
+	// if err != nil {
+	// 	return err
+	// }
+	// log.Print("inside reddis store, printing values")
+	// log.Println(values)
+
+	log.Print("inside reddis store, printing keys")
+	log.Println(keys)
 
 	pipe := rs.Client.Pipeline()
 
@@ -104,7 +120,12 @@ func (rs *RedisStore) GetAll(GameLobbyStates []interface{}) error {
 
 	// get all values for those keys
 	for _, key := range keys {
-		results = append(results, rs.Client.Get(key))
+		log.Print("inside reddis store, printing each key")
+		log.Println(key)
+		str := []byte("[")
+		if key[0] != str[0] {
+			results = append(results, rs.Client.Get(key))
+		}
 	}
 
 	_, err = pipe.Exec()
@@ -112,22 +133,53 @@ func (rs *RedisStore) GetAll(GameLobbyStates []interface{}) error {
 		return err
 	}
 
+	// close connection
+	pipe.Close()
+
+	log.Print("inside reddis store, printing results")
+	log.Println(results)
+
 	// Unmarshal and append to interface
 	for _, val := range results {
 		var lobby interface{}
+		// bytes, err := val.Bytes()
+		// if err != nil {
+		// 	return err
+		// }
+		log.Println("143")
+		values, err := val.Result()
+		if err == redis.Nil {
+			return ErrStateNotFound
+		}
+		log.Println("150")
+		log.Println(values)
 
-		bytes, err := val.Bytes()
+		bytes := []byte(values)
+		err = json.Unmarshal(bytes, &lobby)
 		if err != nil {
+			log.Println(err.Error())
 			return err
 		}
+		log.Println("150")
+		log.Println(lobby)
+		var lobbyStates []interface{}
+		lobbyStates = append(lobbyStates, lobby)
+		log.Println("150")
+		log.Println(lobbyStates)
+		// err = json.Unmarshal([]byte((fmt.Sprintf("%v", (lobbyStates)))), &GameLobbyStates)
+		// if err != nil {
+		// 	log.Println(err.Error())
+		// 	return err
+		// }
 
-		err = json.Unmarshal(bytes, lobby)
-		if err != nil {
-			return err
-		}
-		GameLobbyStates = append(GameLobbyStates, &lobby)
+		GameLobbyStates = lobbyStates
+		log.Println("151")
+		log.Println(GameLobbyStates)
+
 	}
 
+	log.Print("prints gamelobbystate")
+	log.Println(GameLobbyStates)
 	return nil
 
 }
@@ -139,3 +191,6 @@ func (gid GameSessionID) getRedisKey() string {
 	//redis instance
 	return "lid:" + gid.String()
 }
+
+//either continue with the get all keys method or use the hash to get all
+// the problem is though that the hash

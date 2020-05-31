@@ -83,6 +83,7 @@ func (ctx *HandlerContext) LobbyHandlerPost(w http.ResponseWriter, r *http.Reque
 
 // LobbyHandlerGet returns all public game lobbies
 func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Request) {
+	log.Println("inside get lobby handler")
 	SessionState := SessionState{}
 	_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, &SessionState)
 	if err != nil {
@@ -90,17 +91,19 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	gameLobbyStates := make([]interface{}, 0)
+	gameLobbyStates := (make([]interface{}, 0))
 	err = gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
 	if err != nil {
 		http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		return
 	}
-
+	log.Print("this is a gamelobbystates slice from lobbyhandler get all:")
+	log.Println(gameLobbyStates)
 	// make list of public lobbies
 	resultLobbies := make([]ResponseGameLobby, 0)
 	for _, stateInterface := range gameLobbyStates {
-
+		log.Print("this is a stateInterface from lobbyhandler get all:")
+		log.Println(stateInterface)
 		lobbyState, ok := stateInterface.(GameLobbyState) // Cast interface into concrete type
 		if !ok {
 			log.Println("Error casting interface into GameLobbyState")
