@@ -1,23 +1,22 @@
 import React, {Component} from 'react';
 import api from '../Constants/Endpoints.js'
 import LeaveGameLobby from './LeaveGameLobby.js'
+import Errors from './Errors.js'
 
 class GameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            game_type: "",
-            players: [],
-            capacity: null,
+            responseGameLobby: {},
             error: ""
         }
-        this.getGameLobbyState();
+       // this.getGameLobbyState();
     }
 
     // get current game state
     getGameLobbyState = async () => {
-        console.log(this.props.lobbyID);
-        const response = await fetch(api.testbase + api.handlers.gamelobby + this.props.gameLobbyID, {
+        var id = localStorage.getItem("GameLobbyID");
+        const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -28,7 +27,9 @@ class GameLobby extends Component {
             return;
         }
         const gameLobby = await response.json();
-        this.setGameLobbyState(gameLobby);
+        console.log("got game lobby");
+        console.log(gameLobby.lobby_id);
+       // this.setGameLobbyState(gameLobby);
     }
 
     // set error message
@@ -39,9 +40,7 @@ class GameLobby extends Component {
     // sets the game lobby data in state
     setGameLobbyState = (gameLobby) => {
         this.setState({
-            game_type: gameLobby.game_type, 
-            players: gameLobby.players,
-            capacity: gameLobby.capacity
+            responseGameLobby: gameLobby
         });
     }
 
@@ -50,21 +49,24 @@ class GameLobby extends Component {
     // -> client now knows to send get specific game /v1/game/lobbyid(Get) (start loop) 
 
     render() {
-        const { game_type, players, capacity } = this.state;
-        var stringListOfPlayers = "";
-        players.forEach(p => stringListOfPlayers += (p + " "))
+        const { error } = this.state;
+       /* var stringListOfPlayers = "";
+        responseGameLobby.players.forEach(p => stringListOfPlayers += (p + " "));*/
         return(
             <div>
-                <p>
-                    Welcome to {game_type}! <br />
-                    Current players: { stringListOfPlayers } <br />
-                    Waiting for {capacity - players.length} more players...
-                </p>
-                <LeaveGameLobby setInGameLobby={this.props.setInGameLobby} setGameLobbyID={this.props.setGameLobbyID}></LeaveGameLobby>
+                <Errors error={error} setError={this.setError} />
+                {localStorage.getItem("GameLobbyID")}
+                <LeaveGameLobby setGameLobbyID={this.props.setGameLobbyID}></LeaveGameLobby>
             </div>
 
         );
     }
 }
-
+/*
+                <p>
+                    Welcome to {responseGameLobby.game_type}! <br />
+                    Current players: { stringListOfPlayers } <br />
+                    Waiting for {responseGameLobby.capacity - responseGameLobby.players.length} more players...
+                </p>
+*/
 export default GameLobby

@@ -9,7 +9,7 @@ class JoinGameLobby extends Component {
             public_games: {},
             error: ""
         }
-        //this.setPublicGames();
+        //this.getPublicGames();
     }
 
     // sets public games
@@ -54,8 +54,9 @@ class JoinGameLobby extends Component {
             this.setError(error);
             return;
         }
-        this.props.setGameLobbyID(e.target.value);
-        this.props.setInGameLobby(true);
+        var id = e.target.value;
+        this.props.setGameLobbyID(id);
+        localStorage.setItem("GameLobbyID", id);
     }
 
     render() {

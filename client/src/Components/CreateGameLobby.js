@@ -10,13 +10,13 @@ class CreateGameLobby extends Component {
         this.state = {
             game_type: "tictactoe",
             is_private: false,
-            players: [this.props.authToken],
             error: ""
         };
+        this.submitForm = this.submitForm.bind(this);
     }
 
     // handles changes to private public radio buttons
-    handleChange = (e) => {
+    handleChange = () => {
         this.setState({
             is_private: !this.state.is_private
         });
@@ -52,7 +52,7 @@ class CreateGameLobby extends Component {
         }
         const newGame = await response.json();
         var getGameLobbyID = newGame.lobby_id;
-        this.props.setInGameLobby(true);
+        localStorage.setItem("GameLobbyID", getGameLobbyID);
         this.props.setGameLobbyID(getGameLobbyID);
     }
 
@@ -73,7 +73,7 @@ class CreateGameLobby extends Component {
                         <label for="public">Public</label>
                         <input type="radio" id="private" name="publicgame" value="private" checked={this.state.private} onChange={this.handleChange}></input>
                         <label for="private">Private</label>
-                        <select defaultValue={this.state.game_type} onChange={this.handleSelect}>
+                        <select onChange={this.handleSelect}>
                             {games}
                         </select>
                     </div>

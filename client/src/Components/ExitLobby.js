@@ -32,7 +32,6 @@ class ExitLobby extends Component {
         this.setError("");
         this.props.setAuthToken("");
         this.props.setPlayer(null);
-
     }
 
     render() {
