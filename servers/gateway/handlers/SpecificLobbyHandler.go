@@ -146,7 +146,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *htt
 			}
 		}
 	}
-	if !isMember {
+	if !isMember && GameSessionState.GameLobby.Private {
 		http.Error(w, "This game is private, you must be a current player to view it", http.StatusUnauthorized)
 		return
 	}

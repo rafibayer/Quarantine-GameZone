@@ -8,8 +8,8 @@ class CreateGameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            game_type: "tictactoe",
-            is_private: false,
+            gameType: "tictactoe",
+            isPrivate: false,
             error: ""
         };
         this.submitForm = this.submitForm.bind(this);
@@ -18,7 +18,7 @@ class CreateGameLobby extends Component {
     // handles changes to private public radio buttons
     handleChange = () => {
         this.setState({
-            is_private: !this.state.is_private
+            isPrivate: !this.state.isPrivate
         });
     }
 
@@ -35,8 +35,8 @@ class CreateGameLobby extends Component {
     // submit new game form
     submitForm = async (e) => {
         e.preventDefault();
-        const {game_type, is_private, players} = this.state;
-        const sendData = {game_type, is_private, players};
+        const { gameType, isPrivate } = this.state;
+        const sendData = {game_type: gameType, private: isPrivate};
         const response = await fetch(api.testbase + api.handlers.gamelobbbies, {
             method: "POST",
             body: JSON.stringify(sendData),

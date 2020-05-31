@@ -7,10 +7,12 @@ class GameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            responseGameLobby: {},
+            gameType: "",
+            players: [],
+            capacity: 0,
             error: ""
         }
-       // this.getGameLobbyState();
+        this.getGameLobbyState();
     }
 
     // get current game state
@@ -27,9 +29,7 @@ class GameLobby extends Component {
             return;
         }
         const gameLobby = await response.json();
-        console.log("got game lobby");
-        console.log(gameLobby.lobby_id);
-       // this.setGameLobbyState(gameLobby);
+        this.setGameLobbyState(gameLobby.game_type, gameLobby.players, gameLobby.capacity);
     }
 
     // set error message
@@ -38,9 +38,9 @@ class GameLobby extends Component {
     }
 
     // sets the game lobby data in state
-    setGameLobbyState = (gameLobby) => {
+    setGameLobbyState = (gameType, players, capacity) => {
         this.setState({
-            responseGameLobby: gameLobby
+            gameType: gameType, players: players, capacity: capacity
         });
     }
 
@@ -49,24 +49,22 @@ class GameLobby extends Component {
     // -> client now knows to send get specific game /v1/game/lobbyid(Get) (start loop) 
 
     render() {
-        const { error } = this.state;
-       /* var stringListOfPlayers = "";
-        responseGameLobby.players.forEach(p => stringListOfPlayers += (p + " "));*/
+        const { gameType, players, capacity, error } = this.state;
+        var stringListOfPlayers = "";
+        players.forEach(p => stringListOfPlayers += (p + " "));
         return(
             <div>
                 <Errors error={error} setError={this.setError} />
-                {localStorage.getItem("GameLobbyID")}
+                <p>
+                    Welcome to {gameType}! <br />
+                    Current players: { stringListOfPlayers } <br />
+                    Waiting for {capacity - players.length} more players...
+                </p>
                 <LeaveGameLobby setGameLobbyID={this.props.setGameLobbyID}></LeaveGameLobby>
             </div>
 
         );
     }
 }
-/*
-                <p>
-                    Welcome to {responseGameLobby.game_type}! <br />
-                    Current players: { stringListOfPlayers } <br />
-                    Waiting for {responseGameLobby.capacity - responseGameLobby.players.length} more players...
-                </p>
-*/
+
 export default GameLobby
