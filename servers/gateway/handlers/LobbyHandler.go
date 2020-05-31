@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+// type GetAllResponse struct {
+// 	map [GameLobby]map
+// }
+
 //LobbyHandlerPost handles request for making a game lobby
 func (ctx *HandlerContext) LobbyHandlerPost(w http.ResponseWriter, r *http.Request) {
 
@@ -91,27 +95,46 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	gameLobbyStates := (make([]interface{}, 0))
-	err = gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
+	//gameLobbyStates := (make([]interface{}, 0))
+	var gameLobbyStates map[string]string
+	res, err := gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		return
 	}
 	log.Print("this is a gamelobbystates slice from lobbyhandler get all:")
-	log.Println(gameLobbyStates)
+	log.Println(res)
 	// make list of public lobbies
 	resultLobbies := make([]ResponseGameLobby, 0)
-	for _, stateInterface := range gameLobbyStates {
+	for key, element := range res {
 		log.Print("this is a stateInterface from lobbyhandler get all:")
-		log.Println(stateInterface)
-		lobbyState, ok := stateInterface.(GameLobbyState) // Cast interface into concrete type
-		if !ok {
-			log.Println("Error casting interface into GameLobbyState")
+		log.Println(key)
+		log.Println(element)
+		type respLobby struct {
+			StartTime time.Time
+			GameLobby *GameLobby
+		}
+		rLobby := respLobby{}
+		err := json.Unmarshal([]byte(element), &rLobby)
+		if err != nil {
+			log.Println(err.Error())
 			http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 			return
 		}
-		if !lobbyState.GameLobby.Private {
-			lobby, err := ctx.convertToResponseLobbyForClient(*lobbyState.GameLobby)
+		gLobbyState := GameLobbyState{}
+		gLobbyState.StartTime = rLobby.StartTime
+		gLobbyState.GameLobby = rLobby.GameLobby
+		log.Println("rLobby struct")
+		log.Println(gLobbyState)
+		// lobbyState, ok := rLobby.(GameLobbyState) // Cast interface into concrete type
+		// if !ok {
+		// 	log.Println("Error casting interface into GameLobbyState")
+		// 	http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
+		// 	return
+		// }
+		if !gLobbyState.GameLobby.Private && len(gLobbyState.GameLobby.GameID) == 0 {
+			lobby, err := ctx.convertToResponseLobbyForClient(*gLobbyState.GameLobby)
 			if err != nil {
 				http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 				return
