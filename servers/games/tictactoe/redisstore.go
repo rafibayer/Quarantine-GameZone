@@ -75,7 +75,7 @@ func (rs *RedisStore) Get(gid GameID, TicTacToe interface{}) error {
 		return err
 	}
 
-	err = json.Unmarshal([]byte(val), TicTacToe)
+	err = json.Unmarshal([]byte(val), &TicTacToe)
 	if err != nil {
 		return err
 	}

@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"log"
 
 	"net/http"
 )
@@ -28,6 +29,7 @@ const gameIDLength = 16
 
 // GameHandler is used to create new games of tic-tac-toe
 func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Call went to GameHandler post")
 	// Method POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "Please provide method POST", http.StatusMethodNotAllowed)
@@ -52,12 +54,13 @@ func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	gameID := make([]byte, gameIDLength)
-	_, err = rand.Read(gameID)
+	randBytes := make([]byte, gameIDLength)
+	_, err = rand.Read(randBytes)
 	if err != nil {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+	gameID := base64.URLEncoding.EncodeToString(randBytes)
 
 	gamestate := NewTicTacToe(lobby.Players[0], lobby.Players[1])
 	gameStore.Save(GameID(gameID), &gamestate)
@@ -67,7 +70,7 @@ func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request)
 		Gameid    string     `json:"gameid"`
 	}
 
-	resp := Response{gamestate, base64.URLEncoding.EncodeToString(gameID)}
+	resp := Response{gamestate, gameID}
 
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
@@ -86,8 +89,10 @@ func (gameStore *RedisStore) SpecificGameHandler(w http.ResponseWriter, r *http.
 	switch r.Method {
 	case http.MethodPost:
 		gameStore.SpecificGameHandlerPost(w, r)
+		return
 	case http.MethodGet:
 		gameStore.SpecificGameHandlerGet(w, r)
+		return
 	}
 
 	http.Error(w, "Please provide method POST or GET", http.StatusMethodNotAllowed)
