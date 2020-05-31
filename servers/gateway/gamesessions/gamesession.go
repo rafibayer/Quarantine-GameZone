@@ -108,9 +108,13 @@ func GetAllSessions(signingKey string, store Store, GameLobbyState []interface{}
 
 	err := store.GetAll(GameLobbyState)
 	if err != nil {
+		log.Println("error occuring in line 111, gamesession in getting all sessions")
 		log.Println(err.Error())
 		return err
 	}
+
+	log.Println("inside game sessions line 116")
+	log.Print(GameLobbyState)
 
 	return nil
 
