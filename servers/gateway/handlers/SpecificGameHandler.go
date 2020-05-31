@@ -66,10 +66,11 @@ func (ctx *HandlerContext) SpecificGameHandlerPost(w http.ResponseWriter, r *htt
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(resp.StatusCode)
 	for k, v := range r.Header {
 		w.Header().Set(k, v[0])
 	}
+	w.WriteHeader(resp.StatusCode)
+
 	w.Write(body)
 }
 
@@ -96,6 +97,8 @@ func (ctx *HandlerContext) SpecificGameHandlerGet(w http.ResponseWriter, r *http
 	for k, v := range r.Header {
 		w.Header().Set(k, v[0])
 	}
+	w.WriteHeader(resp.StatusCode)
+
 	w.Write(body)
 
 }
