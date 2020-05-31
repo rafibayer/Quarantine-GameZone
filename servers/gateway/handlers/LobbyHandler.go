@@ -100,6 +100,7 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 	// make list of public lobbies
 	resultLobbies := make([]ResponseGameLobby, 0)
 	for _, stateInterface := range gameLobbyStates {
+
 		lobbyState, ok := stateInterface.(GameLobbyState) // Cast interface into concrete type
 		if !ok {
 			log.Println("Error casting interface into GameLobbyState")
@@ -126,3 +127,5 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 	}
 
 }
+
+// redisstore (implements store) -> gamesession -> lobbyHandler

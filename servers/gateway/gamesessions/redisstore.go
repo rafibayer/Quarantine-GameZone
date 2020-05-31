@@ -121,7 +121,11 @@ func (rs *RedisStore) GetAll(GameLobbyStates []interface{}) error {
 			return err
 		}
 
-		GameLobbyStates = append(GameLobbyStates, json.Unmarshal(bytes, lobby))
+		err = json.Unmarshal(bytes, lobby)
+		if err != nil {
+			return err
+		}
+		GameLobbyStates = append(GameLobbyStates, &lobby)
 	}
 
 	return nil

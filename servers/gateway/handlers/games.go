@@ -29,12 +29,12 @@ type NewGameLobby struct {
 //ResponseGameLobby struct represents the state of the lobby that is sent to the client, with no session IDs
 // instead the usern nicknames are stored
 type ResponseGameLobby struct {
-	ID       gamesessions.GameSessionID `json:"lobby_id"`
-	GameType string                     `json:"game_type"`
-	Private  bool                       `json:"private"`
-	Players  []string                   `json:"players"`
-	Capacity int                        `json:"capacity"`
-	GameID   string                     `json:"gameID"`
+	ID        gamesessions.GameSessionID `json:"lobby_id"`
+	GameType  string                     `json:"game_type"`
+	Private   bool                       `json:"private"`
+	Players   []string                   `json:"players"`
+	Capacity  int                        `json:"capacity"`
+	GameReady bool                       `json:"game_ready"`
 }
 
 // replaces all sessionIDs with player nicknames for client
@@ -53,7 +53,11 @@ func (ctx *HandlerContext) convertToResponseLobbyForClient(gameLobby GameLobby) 
 	gameLobbyResponse.GameType = gameLobby.GameType
 	gameLobbyResponse.Private = gameLobby.Private
 	gameLobbyResponse.Capacity = gameLobby.Capacity
-	gameLobbyResponse.GameID = gameLobby.GameID
+	if len(gameLobby.GameID) > 0 {
+		gameLobbyResponse.GameReady = true
+	} else {
+		gameLobbyResponse.GameReady = false
+	}
 	gameLobbyResponse.Players = nicknames
 	return gameLobbyResponse, nil
 }
