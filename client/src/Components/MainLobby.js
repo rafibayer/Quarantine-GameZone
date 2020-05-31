@@ -10,7 +10,7 @@ class MainLobby extends Component {
         return(
             <div>
                 {this.props.inGameLobby ? 
-                <GameLobby authToken={this.props.authToken} setInGameLobby={this.props.setInGameLobby} setGameLobbyID={this.props.setGameLobbyID} lobbyID={this.props.lobbyID} /> 
+                <GameLobby authToken={this.props.authToken} setInGameLobby={this.props.setInGameLobby} setGameLobbyID={this.props.setGameLobbyID} gameLobbyID={this.props.gameLobbyID} /> 
                 :
                 <div>
                     <h1>Hello {this.props.player}. Welcome to the Quarantine GameZone Lobby!</h1>

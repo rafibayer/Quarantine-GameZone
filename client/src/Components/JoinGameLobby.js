@@ -43,7 +43,7 @@ class JoinGameLobby extends Component {
     // join game (post request to specific lobby handler)
     joinGame = async (e) => {
         e.preventDefault();
-        const response = await fetch(api.testbase + api.handlers.game, {
+        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
             method: "POST",
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")

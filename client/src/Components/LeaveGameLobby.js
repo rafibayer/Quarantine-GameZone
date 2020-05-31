@@ -19,7 +19,7 @@ class LeaveGameLobby extends Component {
     handleExit = async (e) => {
         e.preventDefault();
         /* add this when there is a delete handler
-        const response = await fetch(api.testbase + api.handlers.games, {
+        const response = await fetch(api.testbase + api.handlers.gamelobby, {
             method: "DELETE",
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")

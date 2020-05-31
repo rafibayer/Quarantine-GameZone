@@ -13,7 +13,7 @@ class App extends Component {
       authToken: localStorage.getItem("Authorization") || "",
       player: null,
       inGameLobby: localStorage.getItem("InGameLobby") || false,
-      lobby_id: localStorage.getItem("GameLobbyID") || null,
+      gameLobbyID: localStorage.getItem("GameLobbyID") || null,
       error: ""
     };
    this.getCurrentPlayer();
@@ -74,13 +74,13 @@ class App extends Component {
   }
 
   render() {
-    const { player, error } = this.state;
+    const { player, inGameLobby, gameLobbyID, error } = this.state;
     return (
       // return either create nickname page or lobby page depending if they have created a player session
       <div>
         <Errors error={error} setError={this.setError} />
         {player ?  
-        <MainLobby player={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} setInGameLobby={this.setInGameLobby} setGameLobbyID={this.setGameLobbyID} inGameLobby={this.state.inGameLobby} lobbyID={this.state.lobby_id} /> 
+        <MainLobby player={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} setInGameLobby={this.setInGameLobby} setGameLobbyID={this.setGameLobbyID} inGameLobby={inGameLobby} gameLobbyID={gameLobbyID} /> 
         : 
         <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
       </div>
