@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import api from '../Constants/Endpoints.js'
-import LeaveGame from './LeaveGame.js'
+import LeaveGameLobby from './LeaveGameLobby.js'
 
-class GameRouter extends Component {
+class GameLobby extends Component {
 
     // get current game state
     getGameState = async (id) => {
@@ -16,20 +16,20 @@ class GameRouter extends Component {
             this.setError(error);
             return;
         }
-        const games = await response.json();
-        this.setPublicGames(games);
     }
-
 
     render() {
         return(
             <div>
-                This is a game lobby with ID: {this.props.gameID}
-                <LeaveGame setInGame={this.props.setInGame} setGameID={this.props.setGameID}></LeaveGame>
+                <p>
+                    This is a game lobby with ID: {this.props.lobbyID} <br />
+                    Waiting for more players to join...
+                </p>
+                <LeaveGameLobby setInGameLobby={this.props.setInGameLobby} setGameLobbyID={this.props.setGameLobbyID}></LeaveGameLobby>
             </div>
 
         );
     }
 }
 
-export default GameRouter
+export default GameLobby

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import api from '../Constants/Endpoints.js';
 import Errors from './Errors.js';
 
-class LeaveGame extends Component {
+class LeaveGameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -15,6 +15,7 @@ class LeaveGame extends Component {
         this.setState({ error })
     }
 
+    // handles exiting a game lobby or game
     handleExit = async (e) => {
         e.preventDefault();
         /* add this when there is a delete handler
@@ -30,11 +31,11 @@ class LeaveGame extends Component {
             return;
         }
         */
-        localStorage.setItem("InGame", false);
-        localStorage.setItem("GameID", null);
+        localStorage.setItem("InGameLobby", false);
+        localStorage.setItem("GameLobbyID", null);
         this.setError("");
-        this.props.setInGame(false);
-        this.props.setGameID(null);
+        this.props.setInGameLobby(false);
+        this.props.setGameLobbyID(null);
     }
 
     render() {
@@ -48,4 +49,4 @@ class LeaveGame extends Component {
     }
 }
 
-export default LeaveGame
+export default LeaveGameLobby

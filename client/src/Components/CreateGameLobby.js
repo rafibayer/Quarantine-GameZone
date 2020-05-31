@@ -4,7 +4,7 @@ import api from '../Constants/Endpoints.js'
 import Errors from './Errors.js'
 
 // player creates a new game
-class CreateGame extends Component {
+class CreateGameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -37,7 +37,7 @@ class CreateGame extends Component {
         e.preventDefault();
         const {game_type, is_private, players} = this.state;
         const sendData = {game_type, is_private, players};
-        const response = await fetch(api.testbase + api.handlers.games, {
+        const response = await fetch(api.testbase + api.handlers.gamelobbbies, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({
@@ -51,9 +51,9 @@ class CreateGame extends Component {
             return;
         }
         const newGame = await response.json();
-        var getGameID = newGame.game_id;
-        this.props.setInGame(true);
-        this.props.setGameID(getGameID);
+        var getGameLobbyID = newGame.lobby_id;
+        this.props.setInGameLobby(true);
+        this.props.setGameLobbyID(getGameLobbyID);
     }
 
     render() {
@@ -84,4 +84,4 @@ class CreateGame extends Component {
     }
 }
 
-export default CreateGame
+export default CreateGameLobby

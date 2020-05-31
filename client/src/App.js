@@ -12,8 +12,8 @@ class App extends Component {
     this.state = {
       authToken: localStorage.getItem("Authorization") || "",
       player: null,
-      inGame: localStorage.getItem("InGame") || false,
-      game_id: localStorage.getItem("GameID") || null,
+      inGameLobby: localStorage.getItem("InGameLobby") || false,
+      lobby_id: localStorage.getItem("GameLobbyID") || null,
       error: ""
     };
    this.getCurrentPlayer();
@@ -36,10 +36,10 @@ class App extends Component {
     if (response.status >= 300) {
         alert("Unable to get player session, bringing back to nickname creation.");
         localStorage.setItem("Authorization", "");
-        localStorage.setItem("InGame", false);
+        localStorage.setItem("InGameLobby", false);
         this.setAuthToken("");
         this.setPlayer(null);
-        this.setInGame(false);
+        this.setInGameLobby(false);
         return;
     }
     const player = await response.text()
@@ -57,15 +57,15 @@ class App extends Component {
   }
 
   // sets status to ingame (includes in waiting lobby)
-  setInGame = (bool) => {
-      this.setState({ inGame: bool});
-      localStorage.setItem("InGame", bool);
+  setInGameLobby = (bool) => {
+      this.setState({ inGameLobby: bool});
+      localStorage.setItem("InGameLobby", bool);
   }
 
   // set joined game id
-  setGameID = (id) => {
-      this.setState({game_id: id});
-      localStorage.setItem("GameID", id);
+  setGameLobbyID = (id) => {
+      this.setState({lobby_id: id});
+      localStorage.setItem("GameLobbyID", id);
   }
 
   // set error message
@@ -80,7 +80,7 @@ class App extends Component {
       <div>
         <Errors error={error} setError={this.setError} />
         {player ?  
-        <MainLobby player={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} setInGame={this.setInGame} setGameID={this.setGameID} inGame={this.state.inGame} gameID={this.state.game_id} /> 
+        <MainLobby player={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} setInGameLobby={this.setInGameLobby} setGameLobbyID={this.setGameLobbyID} inGameLobby={this.state.inGameLobby} lobbyID={this.state.lobby_id} /> 
         : 
         <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
       </div>

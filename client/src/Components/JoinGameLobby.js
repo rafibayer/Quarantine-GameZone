@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import api from '../Constants/Endpoints.js'
 import Errors from './Errors.js'
 
-class JoinGame extends Component {
+class JoinGameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -25,7 +25,7 @@ class JoinGame extends Component {
     /*
     // gets recent public games for player to join
     getPublicGames = async () => {
-        const response = await fetch(api.testbase + api.handlers.lobbies, {
+        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -54,8 +54,8 @@ class JoinGame extends Component {
             this.setError(error);
             return;
         }
-        this.props.setGameID(e.target.value);
-        this.props.setInGame(true);
+        this.props.setGameLobbyID(e.target.value);
+        this.props.setInGameLobby(true);
     }
 
     render() {
@@ -76,4 +76,4 @@ class JoinGame extends Component {
     }
 }
 
-export default JoinGame
+export default JoinGameLobby
