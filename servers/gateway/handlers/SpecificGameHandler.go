@@ -70,7 +70,6 @@ func (ctx *HandlerContext) SpecificGameHandlerPost(w http.ResponseWriter, r *htt
 		w.Header().Set(k, v[0])
 	}
 	w.WriteHeader(resp.StatusCode)
-
 	w.Write(body)
 }
 
@@ -78,6 +77,12 @@ func (ctx *HandlerContext) SpecificGameHandlerPost(w http.ResponseWriter, r *htt
 // and directs response back to the client
 func (ctx *HandlerContext) SpecificGameHandlerGet(w http.ResponseWriter, r *http.Request) {
 
+	// SessionState := SessionState{}
+	// sessID, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, &SessionState)
+	// if err != nil {
+	// 	http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
+	// 	return
+	// }
 	reqEndPoint, err := ctx.gameAndPlayerAuthentication(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
@@ -98,7 +103,5 @@ func (ctx *HandlerContext) SpecificGameHandlerGet(w http.ResponseWriter, r *http
 		w.Header().Set(k, v[0])
 	}
 	w.WriteHeader(resp.StatusCode)
-
 	w.Write(body)
-
 }

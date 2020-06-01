@@ -13,11 +13,21 @@ import (
 )
 
 // Given a gamelobby, activate the game and return the gamestate struct
-func activateGame(lobby *GameLobby) (map[string]interface{}, error) {
-	requestBody, err := json.Marshal(lobby)
+func activateGame(lobby *GameLobby, sessID sessions.SessionID) (map[string]interface{}, error) {
+	requestBody, err := json.Marshal(&lobby)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("lobby from activate game", &lobby)
+	log.Println("requestbody", requestBody)
+
+	// request, err := http.NewRequest("POST", Endpoints[lobby.GameType], bytes.NewBuffer(requestBody))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// request.Header.Set("Authorization", "bearer"+sessID.String())
 
 	resp, err := http.Post(Endpoints[lobby.GameType], "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
@@ -88,7 +98,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 		// <- gamestate json + gameid (thats in redis)
 		// you store gameid in lobby
 		// <- client
-		result, err := activateGame(gameLobby)
+		result, err := activateGame(gameLobby, gameLobby.Players[0])
 		if err != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
@@ -156,8 +166,6 @@ func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *htt
 		http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
 		return
 	}
-
-	//gameLobby := GameSessionState.GameLobby
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)
@@ -167,47 +175,4 @@ func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *htt
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-	// } else if r.Method = http.MethodPatch {
-
-	// 	SessionState := SessionState{}
-	// 	_, err := sessions.GetState(
-	// 		r,
-	// 		ctx.SigningKey,
-	// 		ctx.SessionStore,
-	// 		&SessionState,
-	// 	)
-	// 	if err != nil {
-	// 		http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
-	// 		return
-	// 	}
-
-	// 	LobbySessionState := GameLobbyState{}
-	// 	_, err = gamesessions.GetGameState(
-	// 		r,
-	// 		ctx.SigningKey,
-	// 		ctx.GameSessionStore,
-	// 		&GameSessionState,
-	// 	)
-	// 	if err != nil {
-	// 		http.Error(w, "lobby session doesn't exist", http.StatusUnauthorized)
-	// 		return
-	// 	}
-
-	// 	gameID := LobbySessionState.GameID
-	// 	if len(gameID) == 0 || gameID == nil {
-	// 		http.Error(w, "game session doesn't exist", http.StatusUnauthorized)
-	// 		return
-	// 	}
-
-	// 	playerExists := false
-	// 	for _, player := range LobbySessionState.GameLobby.Players {
-	// 		if SessionState.Nickname == player {
-	// 			playerExists = true
-	// 		}
-	// 	}
-
-	// 	if (playerExists) {
-	// 		reqEndPoint = Endpoints[LobbySessionState.gameLobby.GameType] + gameID
-	// 		resp, err := http.Patch(Endpoints[LobbySessionState.gameLobby.GameType] + ga, r.Header.Get("Content-Type"), bytes.NewBuffer(r.Body))
-	// 	}
 }

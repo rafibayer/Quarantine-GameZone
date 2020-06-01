@@ -87,7 +87,6 @@ func (ctx *HandlerContext) LobbyHandlerPost(w http.ResponseWriter, r *http.Reque
 
 // LobbyHandlerGet returns all public game lobbies
 func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Request) {
-	log.Println("inside get lobby handler")
 	SessionState := SessionState{}
 	_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, &SessionState)
 	if err != nil {
@@ -99,18 +98,12 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 	var gameLobbyStates map[string]string
 	res, err := gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
 	if err != nil {
-		log.Println(err.Error())
 		http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		return
 	}
-	log.Print("this is a gamelobbystates slice from lobbyhandler get all:")
-	log.Println(res)
 	// make list of public lobbies
 	resultLobbies := make([]ResponseGameLobby, 0)
-	for key, element := range res {
-		log.Print("this is a stateInterface from lobbyhandler get all:")
-		log.Println(key)
-		log.Println(element)
+	for _, element := range res {
 		type respLobby struct {
 			StartTime time.Time
 			GameLobby *GameLobby
@@ -125,8 +118,7 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		gLobbyState := GameLobbyState{}
 		gLobbyState.StartTime = rLobby.StartTime
 		gLobbyState.GameLobby = rLobby.GameLobby
-		log.Println("rLobby struct")
-		log.Println(gLobbyState)
+
 		// lobbyState, ok := rLobby.(GameLobbyState) // Cast interface into concrete type
 		// if !ok {
 		// 	log.Println("Error casting interface into GameLobbyState")
@@ -151,7 +143,4 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
-
 }
-
-// redisstore (implements store) -> gamesession -> lobbyHandler
