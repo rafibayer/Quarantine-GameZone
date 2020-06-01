@@ -52,11 +52,23 @@ func (ctx *HandlerContext) SpecificGameHandlerPost(w http.ResponseWriter, r *htt
 
 	reqEndPoint, err := ctx.gameAndPlayerAuthentication(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		http.Error(w, "Could not authenticate request", http.StatusUnauthorized)
 		return
 	}
 
-	resp, err := http.Post(reqEndPoint, r.Header.Get("Content-Type"), r.Body)
+	req, err := http.NewRequest("POST", reqEndPoint, r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for k, v := range r.Header {
+		req.Header.Set(k, v[0])
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
@@ -66,7 +78,9 @@ func (ctx *HandlerContext) SpecificGameHandlerPost(w http.ResponseWriter, r *htt
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	for k, v := range r.Header {
+
+	//
+	for k, v := range resp.Header {
 		w.Header().Set(k, v[0])
 	}
 	w.WriteHeader(resp.StatusCode)
@@ -89,7 +103,19 @@ func (ctx *HandlerContext) SpecificGameHandlerGet(w http.ResponseWriter, r *http
 		return
 	}
 
-	resp, err := http.Get(reqEndPoint)
+	req, err := http.NewRequest("GET", reqEndPoint, nil)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for k, v := range r.Header {
+		req.Header.Set(k, v[0])
+	}
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
@@ -99,7 +125,7 @@ func (ctx *HandlerContext) SpecificGameHandlerGet(w http.ResponseWriter, r *http
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	for k, v := range r.Header {
+	for k, v := range resp.Header {
 		w.Header().Set(k, v[0])
 	}
 	w.WriteHeader(resp.StatusCode)

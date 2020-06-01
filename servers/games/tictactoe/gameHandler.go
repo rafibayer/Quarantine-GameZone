@@ -29,7 +29,6 @@ const gameIDLength = 16
 
 // GameHandler is used to create new games of tic-tac-toe
 func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Call went to GameHandler post")
 	// Method POST
 	if r.Method != http.MethodPost {
 		http.Error(w, "Please provide method POST", http.StatusMethodNotAllowed)
@@ -63,7 +62,9 @@ func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request)
 	gameID := base64.URLEncoding.EncodeToString(randBytes)
 
 	gamestate := NewTicTacToe(lobby.Players[0], lobby.Players[1])
-	gameStore.Save(GameID(gameID), &gamestate)
+	log.Printf("made game: %+v", gamestate)
+
+	gameStore.Save(GameID(gameID), gamestate)
 
 	type Response struct {
 		Gamestate *TicTacToe `json:"gamestate"`
