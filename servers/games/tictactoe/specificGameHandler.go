@@ -10,22 +10,18 @@ import (
 
 // SpecificGameHandlerGet is used to get the state of a specific game
 func (gameStore *RedisStore) SpecificGameHandlerGet(w http.ResponseWriter, r *http.Request) {
-	log.Println("Call went to SpecificGameHandler Get")
 
 	// get gameID from request URL
 	resource := r.URL.Path
 	id := path.Base(resource)
-	log.Println("id: " + id)
 
 	game := TicTacToe{}
-	err := gameStore.Get(GameID(id), game)
+	err := gameStore.Get(GameID(id), &game)
 	if err != nil {
 		log.Println("error: " + err.Error())
 		http.Error(w, "Error retrieving gamestate", http.StatusNotFound)
 		return
 	}
-
-	log.Printf("gamestate: %+v", game)
 
 	// Return updated gamestate to requester
 	w.Header().Set("Content-Type", "application/json")
@@ -41,8 +37,9 @@ func (gameStore *RedisStore) SpecificGameHandlerGet(w http.ResponseWriter, r *ht
 
 // SpecificGameHandlerPost is used to send moves to a specific game
 func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *http.Request) {
-	log.Println("Call went to SpecificGameHandler post")
 
+	log.Println("request reached: SpecificGameHandlerPost")
+	log.Printf("Headers: %+v", r.Header)
 	// Content JSON
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "415: Request body must be application/json", http.StatusUnsupportedMediaType)
@@ -51,11 +48,12 @@ func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *h
 
 	// ensure the header schema is valid
 	if !strings.HasPrefix(r.Header.Get("Authorization"), "Bearer ") {
+		log.Println("Unauthorized game request")
 		http.Error(w, "Unauthorized game request", http.StatusUnauthorized)
 		return
 	}
 
-	sid := strings.Split(r.Header.Get("auth"), " ")[1]
+	sid := strings.Split(r.Header.Get("Authorization"), " ")[1]
 
 	// get gameID from request URL
 	resource := r.URL.Path
@@ -70,6 +68,8 @@ func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *h
 		return
 	}
 
+	log.Printf("Recieved move: %+v:", move)
+
 	// retrieve game state from redis
 	game := TicTacToe{}
 	err = gameStore.Get(GameID(id), &game)
@@ -83,7 +83,7 @@ func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *h
 	mover := -1
 	if sid == game.Xid {
 		mover = x
-	} else if sid == game.Xid {
+	} else if sid == game.Oid {
 		mover = o
 	}
 	if mover == -1 {
@@ -112,5 +112,6 @@ func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *h
 	err = encoder.Encode(game)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
 	}
 }
