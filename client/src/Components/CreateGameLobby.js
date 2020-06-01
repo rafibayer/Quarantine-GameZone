@@ -37,7 +37,7 @@ class CreateGameLobby extends Component {
         e.preventDefault();
         const { gameType, isPrivate } = this.state;
         const sendData = {game_type: gameType, private: isPrivate};
-        const response = await fetch(api.testbase + api.handlers.gamelobbbies, {
+        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({

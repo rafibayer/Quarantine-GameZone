@@ -58,7 +58,7 @@ class GameLobby extends Component {
                 <p>
                     Welcome to {gameType}! <br />
                     Current players: { stringListOfPlayers } <br />
-                    Waiting for {capacity - players.length} more players...
+                    Waiting for {capacity - players.length} more player(s)...
                 </p>
                 <LeaveGameLobby setGameLobbyID={this.props.setGameLobbyID}></LeaveGameLobby>
             </div>
