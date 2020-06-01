@@ -4,6 +4,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 
 	"net/http"
@@ -25,7 +27,68 @@ type Move struct {
 	Col int `json:"col"`
 }
 
+// TicTacToeResponse struct holds gamestate for client use,
+// uses nicknames instead of sensitive session ID's
+type TicTacToeResponse struct {
+	Board   [3][3]int `json:"Board"`
+	Xturn   bool      `json:"xturn"`
+	Xname   string    `json:"xname"`
+	Oname   string    `json:"oname"`
+	Outcome string    `json:"outcome"`
+}
+
 const gameIDLength = 16
+
+// InvalidNickname is a placeholder if a sessions nickname cannot be found
+const InvalidNickname = "INVALID"
+
+func PrepareGameStateResponse(game *TicTacToe) (*TicTacToeResponse, error) {
+	client := &http.Client{}
+
+	xname, err := GetNickname(game.Xid, client)
+	if err != nil {
+		return nil, err
+	}
+	oname, err := GetNickname(game.Oid, client)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &TicTacToeResponse{
+		Board:   game.Board,
+		Xturn:   game.Xturn,
+		Xname:   xname,
+		Oname:   oname,
+		Outcome: game.Outcome,
+	}
+
+	log.Printf("Made game response: %+v", result)
+	return result, nil
+}
+
+// GetNickname retrieves a nickname for a given sessionID and client connection
+func GetNickname(sid string, client *http.Client) (string, error) {
+	req, err := http.NewRequest("GET", Endpoints["nicknames"], nil)
+	if err != nil {
+		return InvalidNickname, err
+	}
+	req.Header.Set("Authorization", "Bearer "+sid)
+	nameResp, err := client.Do(req)
+	if err != nil {
+		return InvalidNickname, err
+	}
+	if nameResp.StatusCode >= 400 {
+		return InvalidNickname, fmt.Errorf("Recieved status %s from server", string(nameResp.StatusCode))
+	}
+
+	name, err := ioutil.ReadAll(nameResp.Body)
+	if err != nil {
+		return InvalidNickname, err
+	}
+
+	return string(name), nil
+
+}
 
 // GameHandler is used to create new games of tic-tac-toe
 func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request) {

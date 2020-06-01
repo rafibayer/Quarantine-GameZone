@@ -23,11 +23,16 @@ func (gameStore *RedisStore) SpecificGameHandlerGet(w http.ResponseWriter, r *ht
 		return
 	}
 
+	respGameState, err := PrepareGameStateResponse(&game)
+	if err != nil {
+		http.Error(w, "Preparing game response", http.StatusInternalServerError)
+		return
+	}
 	// Return updated gamestate to requester
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)
-	err = encoder.Encode(game)
+	err = encoder.Encode(respGameState)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -105,11 +110,16 @@ func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *h
 		return
 	}
 
+	respGameState, err := PrepareGameStateResponse(&game)
+	if err != nil {
+		http.Error(w, "Preparing game response", http.StatusInternalServerError)
+		return
+	}
 	// Return updated gamestate to requester
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)
-	err = encoder.Encode(game)
+	err = encoder.Encode(respGameState)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
