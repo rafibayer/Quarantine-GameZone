@@ -35,6 +35,7 @@ class LeaveGameLobby extends Component {
         localStorage.removeItem("GameLobbyID");
         this.props.setGameLobbyID("");
         this.setError("");
+        this.props.removeGameLobbyState();
     }
 
     render() {

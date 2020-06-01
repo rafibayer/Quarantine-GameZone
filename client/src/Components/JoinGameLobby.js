@@ -58,12 +58,10 @@ class JoinGameLobby extends Component {
         }
        
         this.props.setGameLobbyID(id);
-        localStorage.setItem("GameLobbyID", id);
     }
 
     render() {
         // get public games to display
-      
         let displayPublicGames = [];
         Object.values(this.state.publicGames).forEach((game) => {
             let gameTypeName = gametypes[game.game_type];

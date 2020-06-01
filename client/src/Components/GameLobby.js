@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import api from '../Constants/Endpoints.js'
+import gametypes from '../Constants/GameTypes.js'
 import LeaveGameLobby from './LeaveGameLobby.js'
 import Errors from './Errors.js'
 
@@ -7,29 +7,9 @@ class GameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            gameType: "",
-            players: [],
-            capacity: 0,
             error: ""
         }
-        this.getGameLobbyState();
-    }
-
-    // get current game state
-    getGameLobbyState = async () => {
-        var id = localStorage.getItem("GameLobbyID");
-        const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
-            headers: new Headers({
-                "Authorization": localStorage.getItem("Authorization")
-            })
-        });
-        if (response.status >= 300) {
-            const error = await response.text();
-            this.setError(error);
-            return;
-        }
-        const gameLobby = await response.json();
-        this.setGameLobbyState(gameLobby.game_type, gameLobby.players, gameLobby.capacity);
+        this.props.getGameLobbyState();
     }
 
     // set error message
@@ -37,30 +17,32 @@ class GameLobby extends Component {
         this.setState({ error })
     }
 
-    // sets the game lobby data in state
-    setGameLobbyState = (gameType, players, capacity) => {
-        this.setState({
-            gameType: gameType, players: players, capacity: capacity
-        });
-    }
 
     // post
     // all lobby changes (addingplayer)	-> creates a game (lets client know) ->
     // -> client now knows to send get specific game /v1/game/lobbyid(Get) (start loop) 
 
     render() {
-        const { gameType, players, capacity, error } = this.state;
+        const { error } = this.state;
+        let gameLobby = JSON.parse(localStorage.getItem("GameLobby"));
+        let gameType = gameLobby.game_type;
+        let players = gameLobby.players;
+        let capacity = gameLobby.capacity;
+        let gameTypeName = gametypes[gameType];
+        console.log(gameType);
+        console.log(gametypes);
+        console.log(gameTypeName);
         var stringListOfPlayers = "";
         players.forEach(p => stringListOfPlayers += (p + " "));
         return(
             <div>
                 <Errors error={error} setError={this.setError} />
                 <p>
-                    Welcome to {gameType}! <br />
+                    Welcome to {gameTypeName.displayName}! <br />
                     Current players: { stringListOfPlayers } <br />
                     Waiting for {capacity - players.length} more player(s)...
                 </p>
-                <LeaveGameLobby setGameLobbyID={this.props.setGameLobbyID}></LeaveGameLobby>
+                <LeaveGameLobby setGameLobbyID={this.props.setGameLobbyID} removeGameLobbyState={this.props.removeGameLobbyState}></LeaveGameLobby>
             </div>
 
         );
