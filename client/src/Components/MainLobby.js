@@ -34,7 +34,6 @@ class MainLobby extends Component {
             gameLobby: null
         });
         localStorage.setItem("GameLobby", null);
-       // this.props.setGameLobbyID(null);
     }
     
     render() {

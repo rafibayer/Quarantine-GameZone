@@ -10,7 +10,6 @@ class JoinGameLobby extends Component {
             publicGames: {},
             error: ""
         }
-        this.joinGame = this.joinGame.bind(this);
         this.getPublicGames();
     }
 
