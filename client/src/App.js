@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import CreateNickname from './Components/CreateNickname.js'
-import Lobby from './Components/Lobby.js'
+import MainLobby from './Components/MainLobby.js'
+import Errors from './Components/Errors.js'
 import api from './Constants/Endpoints.js';
 
 import './App.css';
@@ -9,14 +10,11 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      authToken: localStorage.getItem("Authorization") || null,
-      player: null
+      authToken: localStorage.getItem("Authorization") || "",
+      player: null,
+      error: ""
     };
-   // this.getCurrentPlayer();
-   
-   localStorage.setItem("Authorization", "");
-   this.setAuthToken("");
-   this.setPlayer(null);
+   this.getCurrentPlayer();
   }
 
   handleChange = (e) => {
@@ -24,11 +22,11 @@ class App extends Component {
   }
 
   // gets current player session from authorization header
- /* getCurrentPlayer = async () => {
+  getCurrentPlayer = async () => {
     if (!this.state.authToken) {
       return;
     }
-    const response = await fetch(api.testbase + api.handlers.players, {
+    const response = await fetch(api.testbase + api.handlers.player, {
       headers: new Headers({
           "Authorization": this.state.authToken
       })
@@ -36,13 +34,14 @@ class App extends Component {
     if (response.status >= 300) {
         alert("Unable to get player session, bringing back to nickname creation.");
         localStorage.setItem("Authorization", "");
+        localStorage.setItem("GameLobby", null);
         this.setAuthToken("");
-        this.setPlayer(null)
+        this.setPlayer(null);
         return;
     }
-    const player = await response.json()
+    const player = await response.text()
     this.setPlayer(player);
-  }*/
+  }
  
   // set auth token
   setAuthToken = (authToken) => {
@@ -54,15 +53,23 @@ class App extends Component {
       this.setState({ player });
   }
 
+  // set error message
+  setError = (error) => {
+    this.setState({ error })
+  }
+
   render() {
-    const { player } = this.state;
-    return (
-      // return either create nickname page or lobby page depending if they have created a player session
+    const { player, error } = this.state;
+    return(
       <div>
-        {player ?  <Lobby /> : <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />}
+        <Errors error={error} setError={this.setError} />
+        {player ?
+          <MainLobby player={player} setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} /> 
+          : 
+          <CreateNickname setAuthToken={this.setAuthToken} setPlayer={this.setPlayer} />
+        }
       </div>
     );
-    
   }
 }
 

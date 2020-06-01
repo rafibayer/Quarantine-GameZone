@@ -51,7 +51,7 @@ class CreateNickname extends Component {
             <div>
                 <Errors error={error} setError={this.setError} />
                 <form>
-                    <label for="nickname">Nickname</label>
+                    <label for="nickname">Enter a nickname here: </label>
                     <input type="text" id="nickname" value={this.state.nickname} onChange={this.handleChange} />
                     <input type="submit" value="Submit" onClick={this.submitForm} />
                 </form>
