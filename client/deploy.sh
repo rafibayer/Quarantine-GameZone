@@ -1,3 +1,5 @@
+sh ./build.sh
+
 docker rm -f gamezone_client
 
 docker run  \
