@@ -8,7 +8,6 @@ class LeaveGameLobby extends Component {
         this.state = {
             error: ""
         };
-        this.handleExit = this.handleExit.bind(this);
     }
 
     // set error message
@@ -32,10 +31,8 @@ class LeaveGameLobby extends Component {
             return;
         }
         */
-        localStorage.removeItem("GameLobbyID");
-        this.props.setGameLobbyID("");
         this.setError("");
-        this.props.removeGameLobbyState();
+        this.props.removeGameLobby();
     }
 
     render() {

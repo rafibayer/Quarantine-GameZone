@@ -12,7 +12,6 @@ class CreateGameLobby extends Component {
             isPrivate: false,
             error: ""
         };
-        this.submitForm = this.submitForm.bind(this);
     }
 
     // handles changes to private public radio buttons
@@ -51,9 +50,8 @@ class CreateGameLobby extends Component {
             return;
         }
         const newGame = await response.json();
-        var getGameLobbyID = newGame.lobby_id;
-        localStorage.setItem("GameLobbyID", getGameLobbyID);
-        this.props.setGameLobbyID(getGameLobbyID);
+        localStorage.setItem("GameLobby", JSON.stringify(newGame));
+        this.props.setGameLobby(newGame);
     }
 
     render() {

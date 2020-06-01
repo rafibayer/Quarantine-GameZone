@@ -34,6 +34,7 @@ class App extends Component {
     if (response.status >= 300) {
         alert("Unable to get player session, bringing back to nickname creation.");
         localStorage.setItem("Authorization", "");
+        localStorage.setItem("GameLobby", null);
         this.setAuthToken("");
         this.setPlayer(null);
         return;

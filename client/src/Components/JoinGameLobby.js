@@ -44,7 +44,10 @@ class JoinGameLobby extends Component {
     // join game 
     joinGame = async (e) => {
         e.preventDefault();
-        var id = e.target.value;
+        var game = JSON.parse(e.target.value);
+        console.log("checking join game game object");
+        console.log(game);
+        var id = game.lobby_id;
         const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
             method: "POST",
             headers: new Headers({
@@ -56,8 +59,8 @@ class JoinGameLobby extends Component {
             this.setError(error);
             return;
         }
-       
-        this.props.setGameLobbyID(id);
+        localStorage.setItem("GameLobby", JSON.stringify(game));
+        this.props.setGameLobby(game);
     }
 
     render() {
@@ -69,8 +72,9 @@ class JoinGameLobby extends Component {
                 <p>
                     Game: {gameTypeName.displayName} <br /> 
                     Lobby Capacity: {game.players.length}/{game.capacity} <br />
-                    {console.log("adding game id to button: " + game.lobby_id)}
-                    <button value={game.lobby_id} onClick={this.joinGame}>Join</button>
+                    {console.log("adding game object to button")}
+                    {console.log(game)}
+                    <button value={JSON.stringify(game)} onClick={this.joinGame}>Join</button>
                 </p>
             );
         });
