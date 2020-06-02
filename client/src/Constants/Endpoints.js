@@ -6,6 +6,6 @@ export default {
         player: "/v1/sessions/mine",
         gamelobbies: "/v1/gamelobby",
         gamelobby: "/v1/gamelobby/",
-        game: "/v1/game/"
+        game: "/v1/games/"
     }
 }
