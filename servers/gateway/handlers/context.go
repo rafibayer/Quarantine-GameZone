@@ -10,9 +10,10 @@ type HandlerContext struct {
 	SigningKey       string
 	SessionStore     sessions.Store
 	GameSessionStore gamesessions.Store
+	Notifier         *Notifier
 }
 
 // NewHandlerContext creates a new HandlerContext
 func NewHandlerContext(SigningKey string, SessionStore sessions.Store, GameSessionStore gamesessions.Store) *HandlerContext {
-	return &(HandlerContext{SigningKey, SessionStore, GameSessionStore})
+	return &(HandlerContext{SigningKey, SessionStore, GameSessionStore, &Notifier{}})
 }

@@ -7,6 +7,7 @@ require (
 	github.com/go-redis/redis/v7 v7.2.0 // indirect
 	github.com/gorilla/websocket v1.4.2
 	github.com/mitchellh/mapstructure v1.3.1
+	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
 	golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2
 	golang.org/x/net v0.0.0-20190923162816-aa69164e4478
 )
