@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/streadway/amqp"
 )
 
 // https://docs.google.com/document/d/1sVaCIqW1SOicX7KDhEPr6TF_-ADWCGFz4I0KJB0Vbtw/edit
@@ -142,8 +143,6 @@ func main() {
 	sessionStore := sessions.NewRedisStore(client, time.Hour)
 	gameSessionStore := gamesessions.NewRedisStore(client, time.Hour)
 
-	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore)
-
 	// RabbitMQ connection
 	conn, err := amqp.Dial(rabbitAddr)
 	if err != nil {
@@ -157,7 +156,7 @@ func main() {
 	defer ch.Close()
 	q, err := ch.QueueDeclare(
 		rabbitName, //name
-		false,      //durable
+		true,       //durable
 		false,      //autoDelete
 		false,      //exclusive
 		false,      //noWait
@@ -166,7 +165,7 @@ func main() {
 		log.Fatalf("Error declaring a queue: %s", err)
 	}
 	msgs, err := ch.Consume(
-		q.name, //queue
+		q.Name, //queue
 		"",     //consumer
 		false,  //autoAck
 		false,  //exclusive
@@ -177,7 +176,9 @@ func main() {
 		log.Fatalf("Error when setting up consumer: %s", err)
 	}
 
-	go ctx.Notifier.WriteToConnections(msgs)
+	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore, ch)
+
+	go handlerContext.Notifier.WriteToConnections(msgs)
 
 	// summaryProxy := &httputil.ReverseProxy{Director: CustomDirector(summaryAddresses, handlerContext)}
 	// messageProxy := &httputil.ReverseProxy{Director: CustomDirector(messageAddresses, handlerContext)}

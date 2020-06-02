@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 
@@ -96,8 +97,20 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 				if err := json.Unmarshal([]byte(xuserStr), xuserJSON); err != nil {
 					http.Error(w, "Error unmarshaling X-User into JSON", 500)
 				}
-				fmt.Printf("test: %s: %s", xuserJSON.Nickname, string(p))
+				msgStr := fmt.Sprintf("%s: %s", xuserJSON.Nickname, string(p))
 
+				err := ctx.Channel.Publish(
+					"",      //exchange
+					"queue", //key
+					false,   //mandatory
+					false,   //immediate
+					amqp.Publishing{
+						ContentType: "text/plain",
+						Body:        []byte(msgStr),
+					})
+				if err != nil {
+					log.Printf("Failed to publish message")
+				}
 			} else if messageType == websocket.CloseMessage || err != nil {
 				break
 			}
