@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 class ChatLobby extends Component {
   constructor(props) {
     super(props);
-    this.ws = new WebSocket("ws://localhost/ws") //CHANGE URL
+    this.ws = new WebSocket("ws://localhost:3000/ws") //CHANGE URL
     this.state = {
       message: "",
       messages: []
