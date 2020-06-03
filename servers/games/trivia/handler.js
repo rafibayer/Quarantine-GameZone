@@ -8,7 +8,7 @@ const postGameHandler = async (req, res, { GameState }) => {
     let questions = await fetchQuestions(res);
     console.log(questions)
 
-    const {ID, GameType, Private, Players, Capacity, GameID } = req.body.lobby;
+    const { ID, GameType, Private, Players, Capacity, GameID } = req.body.lobby;
 
     let playersArr = [];
     Players.forEach((p, i) => {
@@ -26,6 +26,7 @@ const postGameHandler = async (req, res, { GameState }) => {
     let counterStart = 0;
 
     const gameState = {
+        id: GameID,
         players: playersArr,
         activeQuestion: questions[counter++],
         counter: counterStart,
@@ -42,14 +43,55 @@ const postGameHandler = async (req, res, { GameState }) => {
         res.status(201).json(newGameState);
     })
 }
-
+//getSpecificGameHandler gets the gameID from url, and fetches the game state,
+// parsing into a response that includes an active question, non-sensitive player info and counter
+// it also makes sure to shuffle the answers for the active question
 const getSpecificGameHandler = async (req, res, { GameState }) => {
+    GameState.findOne({ id: req.params.gameid }).exec().then(gameState => {
+        if (gameState == undefined) {
+            throw new Error("Error getting mesages from Mongo: " + err.message);
+        }
+        let responseGameState = convertToResponseGamestate(gameState);
+        if (responseGameState) {
+            return res.status(200).json(responseGameState);
+        }
+    }).catch(err => {
+        return res.status(404).send("couldn't find trivia game");
+    })
+}
 
-    //use lobby in get response to get correct gamestate
-    //send activequestion to client (question and potential key:answers (only strings))
-    //send players
-    //send counter
+//method converst the gamestate into a respone json for client,
+//  includes active question with no answer and non-sensitive player info
+const convertToResponseGamestate = (gameState) => {
+    // get next active question, and shuffle answers
+    let activeQuestion = gameState.questionBank[gameState.counter++];
+    shuffle(activeQuestion.answers);
+    let playerResponseInfo = [];
+    gameState.players.forEach(p => {
+        let playerInfo = {
+            nickname: p.nickname,
+            score: p.score,
+            alreadyAnswered: p.alreadyAnswered
+        }
+        playerResponseInfo.push(playerInfo);
+    })
+    let responseGameState = {
+        playerInfos = playerResponseInfo,
+        activeQuestion: {
+            question: activeQuestion.question,
+            answers: activeQuestion.answers,
+            counter: counter
+        },
+        counter: gameState.counter
+    }
+    return responseGameState;
+}
 
+const shuffle = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
 }
 
 const postSpecificGameHandler = async (Req, res, { GameState }) => {
@@ -75,36 +117,38 @@ const postSpecificGameHandler = async (Req, res, { GameState }) => {
 //           return data;
 //         })
 //       })
-      
+
 //       req.on('error', (error) => {
 //         return error;
 //       })
-      
+
 //       req.end();
 
 //       console.log(req);
 // }
-  
+
 
 const fetchQuestions = async (res) => {
     try {
-        const response = await fetch("https://opentdb.com/api.php?amount=5&category=27&difficulty=easy&type=multiple");
+        const response = await fetch("https://opentdb.com/api.php?amount=10&category=27&difficulty=easy&type=multiple");
         let data = await response.json();
-        let questions = processData(data.results);
+        let questions = processDataFromTriviaAPI(data.results);
         return questions
     } catch (err) {
         console.log(err);
         return res.status(500).send("internal server error, couldn't get questions for trivia 2");
     }
 }
-const processData = (json) => {
+
+//converts data recieved from trivia API to appropriate schema structure
+const processDataFromTriviaAPI = (json) => {
     let questionBank = [];
     if (json.length == 0) {
         res.status(500).send("Error getting messages.");
         return
     } else {
         json.forEach((q, i) => {
-            question = { 
+            question = {
                 question: q.question,
                 answers: [...q.incorrect_answers].concat(q.correct_answer),
                 correctAnswer: q.correct_answer,

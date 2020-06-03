@@ -8,6 +8,7 @@ const questionSchema = new mongoose.Schema({
 })
 
 const GameStateSchema = new mongoose.Schema({
+    id: {type: String, required: true},
     players: [
         {
             sessID: { type: String, required: true },
@@ -37,12 +38,6 @@ const GameStateSchema = new mongoose.Schema({
 //         });
 // };
 
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
 
 // models/questions.js
 const GameState = mongoose.model('GameState', GameStateSchema);
@@ -85,6 +80,21 @@ module.exports = { GameState };
 //   getQuizQuestions,
 // }
 // }
+
+
+let responseGameState = {
+    playerInfo = {
+        nickname,
+        score,
+        alreadyAnswered
+    },
+    activeQuestion: {
+        question,
+        answers,
+        counter
+    },
+    counter,
+}
 
 
 

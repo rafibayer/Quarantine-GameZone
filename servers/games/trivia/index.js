@@ -32,7 +32,7 @@ var listener = app.listen(4000, function () {
 });
 
 app.post("/v1/trivia", RequestWrapper(postGameHandler, { GameState }));
-app.get("/v1/trivia/", RequestWrapper(getSpecificGameHandler, { GameState }));
+app.get("/v1/trivia/:gameid", RequestWrapper(getSpecificGameHandler, { GameState }));
 
 
 
