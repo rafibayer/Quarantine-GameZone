@@ -31,6 +31,9 @@ func activateGame(lobby *GameLobby, sessID sessions.SessionID) (map[string]inter
 
 	resp, err := http.Post(Endpoints[lobby.GameType], "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
+		log.Println(err)
+		log.Println(Endpoints[lobby.GameType])
+		log.Println(lobby.GameType)
 		return nil, err
 	}
 
@@ -89,6 +92,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 	gameLobby.Players = playersSlice
 	_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, gameLobbyState, w, gameIDType)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -100,6 +104,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 		// <- client
 		result, err := activateGame(gameLobby, gameLobby.Players[0])
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}

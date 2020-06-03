@@ -3,13 +3,15 @@ const express = require("express");
 const config = require('./config');
 const http = require('http');
 
-const { GameStateSchema } = require('./models');
+const gameStateSchema = require('./models');
 const { postGameHandler, getSpecificGameHandler } = require('./handler');
 
 const mongoEndpoint = "mongodb://gamezone_mongo:27017/trivia"
 const port = 4000;
 const app = express();
 app.use(express.json());
+
+const GameState = mongoose.model('GameState', gameStateSchema);
 
 const connectWithRetry = () => {
     console.log('MongoDB connection with retry');
@@ -30,8 +32,13 @@ const RequestWrapper = (handler, SchemeAndDbForwarder) => {
 var listener = app.listen(4000, function () {
     console.log('Listening on port ' + listener.address().port); //Listening on port 8888
 });
-const GameState = mongoose.model('GameState', GameStateSchema);
+//const GameState = mongoose.model('GameState', GameStateSchema);
+app.use((err, req, res, next) => {
+    console.error(err) // log the err to the console (serverside only)
 
+    res.set("Content-Type", "text/plain")
+    res.status(500).send("Server experienced an error")
+})
 
 app.post("/v1/trivia", RequestWrapper(postGameHandler, { GameState }));
 app.get("/v1/trivia/:gameid", RequestWrapper(getSpecificGameHandler, { GameState }));
@@ -44,35 +51,6 @@ mongoose.connection.on('error', console.error)
     .once('open', main);
 
 async function main() {
-    console.log("hello mongo connected I think");
 }
-//     const options = {
-//         hostname: 'gamezone_gateway', // config.Endpoints.nickname[0],
-//         port: 80, //config.Endpoints.nickname[1],
-//         path:  '/v1/sessions/mine', //config.Endpoints.nickname[2],
-//         headers: {
-//             Authorization: "Bearer " + "eDAJ87zSePz971D2xb70N6C2JmCtlwvzGZHH01FbjpYRA9oOHHc5Q6p60jCb079pPP8iTBLJL3kHb6Fe-iYecQ=="
-//         },
-//         method: 'GET'
-//     }
-//     const req = http.request(options, (res) => {
-//         if (res.statusCode >= 400) {
-//             return res.statusCode
-//          }
-//         console.log(`statusCode: ${res.statusCode}`)
-//         res.on('data', (data) => {
-//             console.log(data)
-//           return data;
-//         })
-//       })
-      
-//       req.on('error', (error) => {
-//         return error;
-//       })
-      
-//       req.end();
-
-//       console.log(req);
-// }
 
 

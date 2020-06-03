@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const Schema = require('mongoose').Schema;
 
 // const questionSchema = new Schema({
 //     question: { type: String, required: true },
@@ -9,7 +8,6 @@ const Schema = mongoose.Schema;
 // });
 
 const GameStateSchema = new Schema({
-    id: { type: String, required: true },
     players: [
         {
             sessID: { type: String, required: true },
@@ -32,7 +30,8 @@ const GameStateSchema = new Schema({
         counter: { type: Number, required: true }
     }],
 });
-module.exports = { GameStateSchema };
+
+module.exports = {GameStateSchema};
 //gameHandler (creates gamestate)
     // calls trivia api and gets questions
     // uploads questions into custom schema on mongo

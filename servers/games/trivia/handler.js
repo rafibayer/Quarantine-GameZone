@@ -3,38 +3,38 @@ const redis = require('redis');
 const config = require('./config');
 const http = require('http');
 
-const postGameHandler = async (req, res, { GameState }) => {
+const postGameHandler = async (req, res, next, { GameState }) => {
     //first call on triviadb to get data
     let questions = await fetchQuestions(res);
     //console.log(questions);
-    console.log(req.body);
-    console.log(GameState)
+    //console.log(req.body);
     const { lobby_id, game_type, private, players, capacity, gameID } = req.body;
 
     let playersArr = [];
-    players.forEach((p, i) => {
-        let playerNickname = "test" + i; //GetNickname(p);
-        player = {
-            sessID: p,
-            nickname: playerNickname,
-            score: 0,
-            alreadyAnswered: false
+    players.forEach(async (p, i) => {
+        let playerNickname = await getNickName(p).then(nickname => {
+            if (nickname == Error || nickname == undefined) {
+                res.status(500).send("please make sure you have a nickname")
+                return
+            }
+            player = {
+                sessID: p,
+                nickname: nickname,
+                score: 0,
+                alreadyAnswered: false
 
-        };
-        playersArr.push(player);
-    });
+            };
+            playersArr.push(player);
+        });
+    })
     let counterStart = 0;
 
     const gameState = {
-        id: gameID,
         players: playersArr,
-        activeQuestion: questions[counterStart++],
+        activeQuestion: questions[counterStart],
         counter: counterStart,
         questionBank: questions
     }
-
-    console.log("gameState: ", gameState)
-
     const saveGameState = new GameState(gameState);
     saveGameState.save((err, newGameState) => {
         if (err) {
@@ -42,17 +42,23 @@ const postGameHandler = async (req, res, { GameState }) => {
             res.status(500).send('Unable to create a trivia game');
             return;
         }
-        res.status(201).json(newGameState);
+        console.log(newGameState)
+        let response = {
+            "gameid": newGameState._id
+        }
+        console.log(response);
+        return res.status(201).json(response);
     })
 }
 //getSpecificGameHandler gets the gameID from url, and fetches the game state,
 // parsing into a response that includes an active question, non-sensitive player info and counter
 // it also makes sure to shuffle the answers for the active question
-const getSpecificGameHandler = async (req, res, { GameState }) => {
-    GameState.findOne({ id: req.params.gameid }).exec().then(gameState => {
+const getSpecificGameHandler = async (req, res, next, { GameState }) => {
+    GameState.findOne({_id: req.params.gameid }).exec().then(gameState => {
         if (gameState == undefined) {
             throw new Error("Error getting mesages from Mongo: " + err.message);
         }
+        console.log(gameState)
         let responseGameState = convertToResponseGamestate(gameState);
         if (responseGameState) {
             return res.status(200).json(responseGameState);
@@ -82,7 +88,7 @@ const convertToResponseGamestate = (gameState) => {
         activeQuestion: {
             question: activeQuestion.question,
             answers: activeQuestion.answers,
-            counter: counter
+            counter: gameState.counter
         },
         counter: gameState.counter
     }
@@ -100,34 +106,35 @@ const postSpecificGameHandler = async (Req, res, { GameState }) => {
 
 }
 
-// const getNickName = async (playerSID) => {
-//     const options = {
-//         hostname: config.Endpoints.nickname[0],
-//         port: config.Endpoints.nickname[1],
-//         path: config.Endpoints.nickname[2],
-//         headers: {
-//             Authorization: "Bearer " + playerSID
-//         },
-//         method: 'GET'
-//     }
-//     const req = https.request(options, (res) => {
-//         if (res.statusCode >= 400) {
-//             return res.statusCode
-//          }
-//         console.log(`statusCode: ${res.statusCode}`)
-//         res.on('data', (data) => {
-//           return data;
-//         })
-//       })
-
-//       req.on('error', (error) => {
-//         return error;
-//       })
-
-//       req.end();
-
-//       console.log(req);
-// }
+const getNickName = async (playerSID) => {
+    let nickname = "";
+    const options = {
+        hostname: 'gamezone_gateway', // config.Endpoints.nickname[0],
+        port: 80, //config.Endpoints.nickname[1],
+        path: '/v1/sessions/mine', //config.Endpoints.nickname[2],
+        headers: {
+            Authorization: "Bearer " + playerSID
+        },
+        method: 'GET'
+    }
+    const req = http.request(options, (res) => {
+        if (res.statusCode >= 400) {
+            return error
+        }
+        //console.log(`statusCode: ${res.statusCode}`)
+        nickname = res.on('data', (data) => {
+            let result = String(data)
+            console.log(result)
+            return result;
+        })
+    })
+    req.on('error', (error) => {
+        return error;
+    })
+    req.end();
+    //console.log(nickname)
+    return nickname;
+}
 
 
 const fetchQuestions = async (res) => {
