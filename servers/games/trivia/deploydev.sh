@@ -1,2 +1,6 @@
-docker rm -f mongo_server
-docker run -d -p 27017:27017 --name mongo_server mongo 
+./build.sh
+docker rm -f gamezone_trivia
+docker run -d \
+--network customNet \
+--name gamezone_trivia \
+amitgal17/gamezone_trivia

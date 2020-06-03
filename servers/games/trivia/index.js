@@ -3,10 +3,10 @@ const express = require("express");
 const config = require('./config');
 const http = require('http');
 
-const { GameState } = require('./models');
+const { GameStateSchema } = require('./models');
 const { postGameHandler, getSpecificGameHandler } = require('./handler');
 
-const mongoEndpoint = "mongodb://localhost:27017/trivia"
+const mongoEndpoint = "mongodb://gamezone_mongo:27017/trivia"
 const port = 4000;
 const app = express();
 app.use(express.json());
@@ -30,6 +30,8 @@ const RequestWrapper = (handler, SchemeAndDbForwarder) => {
 var listener = app.listen(4000, function () {
     console.log('Listening on port ' + listener.address().port); //Listening on port 8888
 });
+const GameState = mongoose.model('GameState', GameStateSchema);
+
 
 app.post("/v1/trivia", RequestWrapper(postGameHandler, { GameState }));
 app.get("/v1/trivia/:gameid", RequestWrapper(getSpecificGameHandler, { GameState }));
@@ -37,11 +39,13 @@ app.get("/v1/trivia/:gameid", RequestWrapper(getSpecificGameHandler, { GameState
 
 
 connectWithRetry();
-// mongoose.connection.on('error', console.error)
-//     .on('disconnected', connectWithRetry)
-//     .once('open', main);
+mongoose.connection.on('error', console.error)
+    .on('disconnected', connectWithRetry)
+    .once('open', main);
 
-// async function main() {
+async function main() {
+    console.log("hello mongo connected I think");
+}
 //     const options = {
 //         hostname: 'gamezone_gateway', // config.Endpoints.nickname[0],
 //         port: 80, //config.Endpoints.nickname[1],

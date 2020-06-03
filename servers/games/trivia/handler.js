@@ -6,35 +6,37 @@ const http = require('http');
 const postGameHandler = async (req, res, { GameState }) => {
     //first call on triviadb to get data
     let questions = await fetchQuestions(res);
-    console.log(questions)
-
-    const { ID, GameType, Private, Players, Capacity, GameID } = req.body.lobby;
+    //console.log(questions);
+    console.log(req.body);
+    console.log(GameState)
+    const { lobby_id, game_type, private, players, capacity, gameID } = req.body;
 
     let playersArr = [];
-    Players.forEach((p, i) => {
-        playerNickname = "test" + i; //GetNickname(p);
-        let player =
-        {
-            sessID: player.p,
+    players.forEach((p, i) => {
+        let playerNickname = "test" + i; //GetNickname(p);
+        player = {
+            sessID: p,
             nickname: playerNickname,
             score: 0,
             alreadyAnswered: false
 
         };
-        players.push(player);
+        playersArr.push(player);
     });
     let counterStart = 0;
 
     const gameState = {
-        id: GameID,
+        id: gameID,
         players: playersArr,
-        activeQuestion: questions[counter++],
+        activeQuestion: questions[counterStart++],
         counter: counterStart,
         questionBank: questions
     }
 
-    const query = new GameState(gameState);
-    query.save((err, newGameState) => {
+    console.log("gameState: ", gameState)
+
+    const saveGameState = new GameState(gameState);
+    saveGameState.save((err, newGameState) => {
         if (err) {
             console.log(err)
             res.status(500).send('Unable to create a trivia game');
@@ -76,7 +78,7 @@ const convertToResponseGamestate = (gameState) => {
         playerResponseInfo.push(playerInfo);
     })
     let responseGameState = {
-        playerInfos = playerResponseInfo,
+        playerInfos: playerResponseInfo,
         activeQuestion: {
             question: activeQuestion.question,
             answers: activeQuestion.answers,
