@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"encoding/json"
+	"Quarantine-GameZone-441/servers/gateway/sessions"
 	"fmt"
 	"log"
 	"net/http"
@@ -77,13 +77,13 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	//auth check?
 
-	xuserJSON := &User{}
-	xuserStr := r.URL.Query().Get("X-user")
-	if err := json.Unmarshal([]byte(xuserStr), xuserJSON); err != nil {
-		http.Error(w, "Error unmarshaling X-User into JSON", 500)
+	ss := SessionState{}
+	id, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, ss)
+	if err != nil {
+		http.Error(w, "Failed to get state", 500)
 	}
 
-	ctx.Notifier.InsertConnection(conn, xuserJSON.SessionID)
+	ctx.Notifier.InsertConnection(conn, string(id))
 
 	go (func(conn *websocket.Conn, ctx *HandlerContext, id string) {
 		defer conn.Close()
@@ -92,14 +92,14 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 		for {
 			messageType, p, err := conn.ReadMessage()
 			if messageType == websocket.TextMessage || messageType == websocket.BinaryMessage {
-				xuserJSON := &User{}
-				xuserStr := r.URL.Query().Get("X-user")
-				if err := json.Unmarshal([]byte(xuserStr), xuserJSON); err != nil {
-					http.Error(w, "Error unmarshaling X-User into JSON", 500)
+				ss := SessionState{}
+				_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, ss)
+				if err != nil {
+					http.Error(w, "Failed to get state", 500)
 				}
-				msgStr := fmt.Sprintf("%s: %s", xuserJSON.Nickname, string(p))
+				msgStr := fmt.Sprintf("%s: %s", ss.Nickname, string(p))
 
-				err := ctx.Channel.Publish(
+				err = ctx.Channel.Publish(
 					"",      //exchange
 					"queue", //key
 					false,   //mandatory
@@ -115,5 +115,5 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 		}
-	})(conn, ctx, xuserJSON.SessionID)
+	})(conn, ctx, string(id))
 }

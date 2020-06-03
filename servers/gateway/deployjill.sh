@@ -10,7 +10,7 @@ export REDISADDR=gamezone_redis:6379
 export TLSKEY=LOCALDEPLOY
 export TSLCERT=LOCALDEPLOY
 export SESSKEY=mysesskey
-export RABBITADDR=amqps://gamezone_rabbit:5672
+export RABBITADDR=amqp://gamezone_rabbit:5672
 export RABBITNAME="gamezone_rabbit"
 
 docker network rm customNet
@@ -34,7 +34,6 @@ docker run -d \
   --network customNet \
   -p 5672:5672 \
   -p 15672:15672 \
-  --restart unless-stopped \
   rabbitmq:3-management
 
 docker run -d -p 80:80 \
@@ -47,6 +46,7 @@ docker run -d -p 80:80 \
   -e RABBITNAME=$RABBITNAME \
   --name gamezone_gateway \
   --network customNet \
+  --restart unless-stopped \
   janguy/gamezone_gateway
 
 docker logs gamezone_gateway

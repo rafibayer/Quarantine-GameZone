@@ -5,13 +5,8 @@ class ChatLobby extends Component {
     super(props);
     this.ws = new WebSocket("ws://localhost:3000/ws") //CHANGE URL
     this.state = {
-      message: "",
-      messages: []
+      message: ""
     };
-  }
-
-  renderChat = () => {
-    return <p></p>
   }
 
   handleChange = (e) => {
@@ -24,8 +19,6 @@ class ChatLobby extends Component {
   }
 
   render() {
-    
-
     return(
       <div>
         <div id="chat">{ this.ws.onmessage = (e) => { return <p>{e.data}</p> } }</div>
