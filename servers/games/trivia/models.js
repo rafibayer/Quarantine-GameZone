@@ -1,37 +1,32 @@
 const Schema = require('mongoose').Schema;
 
-// const questionSchema = new Schema({
-//     question: { type: String, required: true },
-//     answers: [{ answer: { type: String, required: true } }],
-//     correctAnswer: { type: String, required: true },
-//     counter: { type: Number, required: true }
-// });
+const questionType = {
+    question: { type: String, required: true },
+    answers: [{ type: String, required: true }],
+    correctAnswer: { type: String, required: true },
+    counter: { type: Number, required: true }
+}
 
+const playerType = {
+    sessID: { type: String, required: true },
+    nickname: { type: String, required: true },
+    score: { type: Number, required: true },
+    alreadyAnswered: { type: Boolean, required: true }
+}
+
+// const GameStateSchema = new Schema({
+//     players: {type: [playerType], required: true},
+//     activeQuestion: { type: questionType, required: true },
+//     counter: { type: Number, required: true },
+//     questionBank: { type: [questionType], required: true },
+// });
+// players: {type: [playerType], required: true},
 const GameStateSchema = new Schema({
-    players: [
-        {
-            sessID: { type: String, required: true },
-            nickname: { type: String, required: true },
-            score: { type: Number, required: true },
-            alreadyAnswered: { type: Boolean, required: true }
-        }
-    ],
-    activeQuestion: {
-        question: { type: String, required: true },
-        answers: [{ answer: { type: String, required: true } }],
-        correctAnswer: { type: String, required: true },
-        counter: { type: Number, required: true }
-    },
-    counter: { type: Number, required: true },
-    questionBank: [{
-        question: { type: String, required: true },
-        answers: [{ answer: { type: String, required: true } }],
-        correctAnswer: { type: String, required: true },
-        counter: { type: Number, required: true }
-    }],
+    counter: Number
 });
 
-module.exports = {GameStateSchema};
+
+module.exports = { GameStateSchema };
 //gameHandler (creates gamestate)
     // calls trivia api and gets questions
     // uploads questions into custom schema on mongo
