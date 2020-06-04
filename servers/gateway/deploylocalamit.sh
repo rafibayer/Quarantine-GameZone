@@ -2,13 +2,20 @@ echo "DEPLOYING LOCALLY"
 
 cd ../games/tictactoe
 ./buildamit.sh
+cd ../trivia
+./build.sh
 cd ../../gateway
 ./buildamit.sh
 
 
+
+
+
+docker rm -f gamezone_trivia
+docker rm -f gamezone_mongo
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
-docker rm -f gamezone_tictactoe
+# docker rm -f gamezone_tictactoe
 
 export REDISADDR=gamezone_redis:6379
 export TLSKEY=LOCALDEPLOY
@@ -24,12 +31,22 @@ docker run -d \
 --network customNet \
 redis
 
+# docker run -d \
+# -e ADDR=:80 \
+# -e REDISADDR=gamezone_redis:6379 \
+# --name gamezone_tictactoe \
+# --network customNet \
+# amitgal17/gamezone_tictactoe
+
 docker run -d \
--e ADDR=:80 \
--e REDISADDR=gamezone_redis:6379 \
---name gamezone_tictactoe \
+--name gamezone_mongo \
 --network customNet \
-amitgal17/gamezone_tictactoe
+mongo
+
+docker run -d \
+--network customNet \
+--name gamezone_trivia \
+amitgal17/gamezone_trivia
 
 docker run -d -p 80:80 \
 -e ADDR=:80 \
