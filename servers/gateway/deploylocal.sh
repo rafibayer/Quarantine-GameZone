@@ -4,6 +4,8 @@ echo "DEPLOYING LOCALLY"
 
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
+docker rm -f gamezone_tictactoe
+
 
 export REDISADDR=gamezone_redis:6379
 export TLSKEY=LOCALDEPLOY
