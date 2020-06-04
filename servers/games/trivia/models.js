@@ -12,29 +12,8 @@ const playerType = {
 }
 const gameStateSchema = new Schema({
     players: {type: [playerType], required: true},
-    activeQuestion: { type: questionType, required: true },
     counter: { type: Number, required: true },
     questionBank: { type: [questionType], required: true },
 });
 
 module.exports = { gameStateSchema };
-
-
-//gameHandler (creates gamestate)
-    // calls trivia api and gets questions
-    // uploads questions into custom schema on mongo
-    // populates rest of game state....
-
-    // specificHandler (Get)
-        //send activequestion to client (question and potential key:answers (only strings))
-        //send players
-        //send counter
-    //specificHandler (post)
-        // url: lobbyID, header: auth, body: "key"
-
-
-
-
-
-
-

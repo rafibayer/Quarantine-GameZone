@@ -15,7 +15,7 @@ docker rm -f gamezone_trivia
 docker rm -f gamezone_mongo
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
-docker rm -f gamezone_tictactoe
+# docker rm -f gamezone_tictactoe
 
 export REDISADDR=gamezone_redis:6379
 export TLSKEY=LOCALDEPLOY
@@ -31,12 +31,12 @@ docker run -d \
 --network customNet \
 redis
 
-docker run -d \
--e ADDR=:80 \
--e REDISADDR=gamezone_redis:6379 \
---name gamezone_tictactoe \
---network customNet \
-amitgal17/gamezone_tictactoe
+# docker run -d \
+# -e ADDR=:80 \
+# -e REDISADDR=gamezone_redis:6379 \
+# --name gamezone_tictactoe \
+# --network customNet \
+# amitgal17/gamezone_tictactoe
 
 docker run -d \
 --name gamezone_mongo \
