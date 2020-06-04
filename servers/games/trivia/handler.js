@@ -33,21 +33,12 @@ const postGameHandler = async (req, res, next, { GameState }) => {
     let questions = await fetchQuestions(res);
     const { lobby_id, game_type, private, players, capacity, gameID } = req.body;
     let playersArr = await loop(players);
-    // const gameState = {
-    //     players: playersArr,
-    //     activeQuestion: questions[0],
-    //     counter: 0,
-    //     questionBank: questions
-    // }
     const gameState = {
-        counter: 0
+        players: playersArr,
+        activeQuestion: questions[0],
+        counter: 0,
+        questionBank: questions
     }
-
-    // GameState.create(gameState, function(err, states) {
-       
-    // })
-
-    // console.log(gameState);
     const saveGameState = new GameState(gameState);
     saveGameState.save((err, newGameState) => {
         if (err) {
@@ -58,7 +49,6 @@ const postGameHandler = async (req, res, next, { GameState }) => {
         let response = {
             "gameid": newGameState._id
         }
-        console.log("newGameState: ", newGameState)
         return res.status(201).json(response);
     })
 }
@@ -68,31 +58,26 @@ const postGameHandler = async (req, res, next, { GameState }) => {
 // parsing into a response that includes an active question, non-sensitive player info and counter
 // it also makes sure to shuffle the answers for the active question
 const getSpecificGameHandler = async (req, res, next, { GameState }) => {
-    console.log(req.params.gameid);
-    try {
-        const states = await GameState.find();
-        // filter private channels we aren't members of
-        const result = states.filter((gamestate) => gamestate);
-        console.log(result)
-        res.status(200).json(result);
-        return
-    } catch (e) {
-        res.status(500).send("There was an internal error getting channels");
-    }
-    // GameState.findOne({_id: req.params.gameid }).exec().then(gameState => {
-    //     if (gameState == undefined) {
-    //         throw new Error("Error getting games from Mongo: " + err.message);
-    //     }
-
-    // if req.headers.Authorization
-    //     console.log(gameState)
-    //     let responseGameState = convertToResponseGamestate(gameState);
-    //     if (responseGameState) {
-    //         return res.status(200).json(responseGameState);
-    //     }
-    // }).catch(err => {
-    //     return res.status(404).send("couldn't find trivia game");
-    // })
+    console.log("gameID: (" + req.params.gameid + ")");
+    GameState.findOne({ _id: req.params.gameid }).exec().then(gameState => {
+        if (gameState == undefined) {
+            throw new Error("Error getting games from Mongo: " + err.message);
+        }
+        if (!req.get("Authorization")) {
+            return res.status(401).send("unauthorized access")
+        }
+        let auth = req.get("Authorization").split(" ")[1]
+        if (gameState.players.some(p => p.sessID == auth))
+            console.log(gameState)
+        let responseGameState = convertToResponseGamestate(gameState);
+        if (responseGameState) {
+            console.log(responseGameState);
+            return res.status(200).json(responseGameState);
+        }
+    }).catch(err => {
+        console.log("error message inside catch: ", err);
+        return res.status(404).send("couldn't find trivia game");
+    })
 }
 
 //method converst the gamestate into a respone json for client,
@@ -115,9 +100,8 @@ const convertToResponseGamestate = (gameState) => {
         activeQuestion: {
             question: activeQuestion.question,
             answers: activeQuestion.answers,
-            counter: gameState.counter
         },
-        counter: gameState.counter
+        questionNumber: gameState.counter
     }
     return responseGameState;
 }
@@ -157,7 +141,6 @@ const processDataFromTriviaAPI = (json) => {
                 question: q.question,
                 answers: [...q.incorrect_answers].concat(q.correct_answer),
                 correctAnswer: q.correct_answer,
-                counter: i
             }
             questionBank.push(question);
         });
@@ -167,3 +150,13 @@ const processDataFromTriviaAPI = (json) => {
 
 
 module.exports = { postGameHandler, getSpecificGameHandler, postSpecificGameHandler };
+// try {
+//     const states = await GameState.find();
+//     // filter private channels we aren't members of
+//     const result = states.filter((gamestate) => gamestate);
+//     console.log(result)
+//     res.status(200).json(result);
+//     return
+// } catch (e) {
+//     res.status(500).send("There was an internal error getting channels");
+// }
