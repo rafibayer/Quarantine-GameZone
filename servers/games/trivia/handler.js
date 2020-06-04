@@ -35,7 +35,6 @@ const postGameHandler = async (req, res, next, { GameState }) => {
     let playersArr = await loop(players);
     const gameState = {
         players: playersArr,
-        activeQuestion: questions[0],
         counter: 0,
         questionBank: questions
     }
@@ -61,18 +60,19 @@ const getSpecificGameHandler = async (req, res, next, { GameState }) => {
     console.log("gameID: (" + req.params.gameid + ")");
     GameState.findOne({ _id: req.params.gameid }).exec().then(gameState => {
         if (gameState == undefined) {
-            throw new Error("Error getting games from Mongo: " + err.message);
+            return res.status(400).send("game wasn't found");
         }
         if (!req.get("Authorization")) {
             return res.status(401).send("unauthorized access")
         }
         let auth = req.get("Authorization").split(" ")[1]
-        if (gameState.players.some(p => p.sessID == auth))
-            console.log(gameState)
-        let responseGameState = convertToResponseGamestate(gameState);
-        if (responseGameState) {
-            console.log(responseGameState);
-            return res.status(200).json(responseGameState);
+        if (gameState.players.some(p => p.sessID == auth)) {
+            let responseGameState = convertToResponseGamestate(gameState);
+            if (responseGameState) {
+                return res.status(200).json(responseGameState);
+            }
+        } else {
+            return res.status(401).send("unauthorized access")
         }
     }).catch(err => {
         console.log("error message inside catch: ", err);
@@ -84,8 +84,7 @@ const getSpecificGameHandler = async (req, res, next, { GameState }) => {
 //  includes active question with no answer and non-sensitive player info
 const convertToResponseGamestate = (gameState) => {
     // get next active question, and shuffle answers
-    let activeQuestion = gameState.questionBank[gameState.counter++];
-    shuffle(activeQuestion.answers);
+    let activeQuestion = gameState.questionBank[gameState.counter];
     let playerResponseInfo = [];
     gameState.players.forEach(p => {
         let playerInfo = {
@@ -113,15 +112,62 @@ const shuffle = (array) => {
     }
 }
 
-const postSpecificGameHandler = async (Req, res, { GameState }) => {
-
+const postSpecificGameHandler = async (req, res, next, { GameState }) => {
+    GameState.findOne({_id: req.params.gameid}).exec().then(gameState => {
+        if (gameState == undefined) {
+            return res.status(500).send("the trivia game wasn't found");
+        }
+        if (!req.get("Authorization")) {
+            return res.status(401).send("unauthorized access");
+        }
+        if (gameState.counter == gameState.questionBank.length) {
+            return res.status(400).send("The game ended")
+        }
+        let auth = req.get("Authorization").split(" ")[1];
+        let currPlayer = gameState.players.filter(p => p.sessID == auth)[0];
+        if (currPlayer) {
+            let activeQuestion = gameState.questionBank[gameState.counter];
+            if (currPlayer.alreadyAnswered) {
+                return res.status(400).send("this player has already answered");
+            }
+            console.log(req.body);
+            console.log(req.body.move);
+            let answerIndex = Number(String((req.body.move)));
+            console.log("type of answer: ", typeof answerIndex);
+            if (typeof answerIndex != "number") {
+                return res.status(400).send("answer must be a number");
+            }
+            if (answerIndex < 0 || answerIndex > activeQuestion.answers.length) {
+                return res.status(400).send("answer must be a valid number represnting index of potential answer");
+            }
+            if (activeQuestion.correctAnswer == activeQuestion.answers[answerIndex]) {
+                currPlayer.score++;
+                currPlayer.alreadyAnswered = true;
+            } else {
+                currPlayer.alreadyAnswered = true; 
+            }
+            if (gameState.players.every(player => player.alreadyAnswered)) {
+                gameState.counter++;
+                gameState.players.forEach(player => player.alreadyAnswered = false);
+            }
+            gameState.save((err, updateGameState) => {
+                if (err) {
+                    return res.status(500).send("unable to update game in mongo")
+                }
+                let response = convertToResponseGamestate(updateGameState);
+                return res.status(201).json(response);
+            });
+        } else {
+            return res.status(401).send("unauthorized access")
+        }
+    })
 }
 
 const fetchQuestions = async (res) => {
     try {
-        const response = await fetch("https://opentdb.com/api.php?amount=10&category=27&difficulty=easy&type=multiple");
+        const response = await fetch("https://opentdb.com/api.php?amount=10&difficulty=easy&type=multiple");
         let data = await response.json();
-        let questions = processDataFromTriviaAPI(data.results);
+        let questions = processDataFromTriviaAPI(data.results, res);
         return questions
     } catch (err) {
         console.log(err);
@@ -130,7 +176,7 @@ const fetchQuestions = async (res) => {
 }
 
 //converts data recieved from trivia API to appropriate schema structure
-const processDataFromTriviaAPI = (json) => {
+const processDataFromTriviaAPI = (json, res) => {
     let questionBank = [];
     if (json.length == 0) {
         res.status(500).send("Error getting messages.");
@@ -139,24 +185,16 @@ const processDataFromTriviaAPI = (json) => {
         json.forEach((q, i) => {
             question = {
                 question: q.question,
-                answers: [...q.incorrect_answers].concat(q.correct_answer),
+                answers: ([...q.incorrect_answers].concat(q.correct_answer)),
                 correctAnswer: q.correct_answer,
             }
+            console.log("before shuffling: ", question.answers)
+            shuffle(question.answers)
+            console.log("after shuffling: ", question.answers)
             questionBank.push(question);
         });
     }
     return questionBank
 }
 
-
 module.exports = { postGameHandler, getSpecificGameHandler, postSpecificGameHandler };
-// try {
-//     const states = await GameState.find();
-//     // filter private channels we aren't members of
-//     const result = states.filter((gamestate) => gamestate);
-//     console.log(result)
-//     res.status(200).json(result);
-//     return
-// } catch (e) {
-//     res.status(500).send("There was an internal error getting channels");
-// }
