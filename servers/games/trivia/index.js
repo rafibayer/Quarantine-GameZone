@@ -3,7 +3,7 @@ const express = require("express");
 const config = require('./config');
 const http = require('http');
 
-const gameStateSchema = require('./models');
+const { gameStateSchema } = require('./models');
 const { postGameHandler, getSpecificGameHandler } = require('./handler');
 
 const mongoEndpoint = "mongodb://gamezone_mongo:27017/trivia"
@@ -29,10 +29,7 @@ const RequestWrapper = (handler, SchemeAndDbForwarder) => {
     }
 }
 
-var listener = app.listen(4000, function () {
-    console.log('Listening on port ' + listener.address().port); //Listening on port 8888
-});
-//const GameState = mongoose.model('GameState', GameStateSchema);
+
 app.use((err, req, res, next) => {
     console.error(err) // log the err to the console (serverside only)
 
@@ -51,6 +48,9 @@ mongoose.connection.on('error', console.error)
     .once('open', main);
 
 async function main() {
+    var listener = app.listen(4000, function () {
+        console.log('Listening on port ' + listener.address().port);
+    })
 }
 
 
