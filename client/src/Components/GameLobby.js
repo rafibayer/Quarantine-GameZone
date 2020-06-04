@@ -6,6 +6,7 @@ import Errors from './Errors.js'
 
 // game imports
 import TicTacToe from './Games/TicTacToe.js'
+import Trivia from './Games/Trivia.js'
 
 
 class GameLobby extends Component {
@@ -81,6 +82,9 @@ class GameLobby extends Component {
         switch (gameType) {
             case "tictactoe":
                 gameContent = <TicTacToe gameID={gameLobbyID} removeGameLobby={this.props.removeGameLobby}></TicTacToe>;
+                break;
+            case "trivia":
+                gameContent = <Trivia gameID={gameLobbyID} removeGameLobby={this.props.removeGameLobby}></Trivia>
                 break;
             default:
                 gameContent = <div>No game of this type</div>;

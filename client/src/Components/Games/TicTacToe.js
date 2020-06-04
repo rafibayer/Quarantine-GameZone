@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import LeaveGameLobby from '../LeaveGameLobby.js'
 import Errors from '../Errors.js'
 import api from '../../Constants/Endpoints.js'
+import '../../Styles/TicTacToe.css';
 
 class TicTacToe extends Component {
     constructor(props) {
@@ -42,7 +43,7 @@ class TicTacToe extends Component {
             })
         });
         if (response.status >= 300) {
-            this.timer = null;
+            clearInterval(this.timer);
             const error = await response.text();
             this.setError(error);
             return;
@@ -123,7 +124,7 @@ class TicTacToe extends Component {
                             break;
                     }
                     var buttonPos = {rowPos: row, colPos: col}
-                    displayBoard.push(<button value={JSON.stringify(buttonPos)} onClick={this.makeMove}>{xoMarker}</button>);
+                    displayBoard.push(<button id="tic-tac-toe-btn" value={JSON.stringify(buttonPos)} onClick={this.makeMove}>{xoMarker}</button>);
                 }
                 displayBoard.push(<br />);
             }
