@@ -16,7 +16,7 @@ class GameLobby extends Component {
             gameReady: false,
             error: ""
         }
-        this.timer = setInterval(() => this.getGameLobby(), 5000);
+        this.timer = setInterval(() => this.getGameLobby(), 3000);
     }
 
     // polling
