@@ -1,10 +1,20 @@
 echo "DEPLOYING LOCALLY"
 
 ./build.sh
+cd ../games/tictactoe
+./build.sh
+cd ../trivia
+./buildrafi.sh
+cd ../../gateway
+
 
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
 docker rm -f gamezone_tictactoe
+docker rm -f gamezone_trivia
+docker rm -f gamezone_mongo
+
+
 
 
 export REDISADDR=gamezone_redis:6379
@@ -27,6 +37,16 @@ docker run -d \
 --name gamezone_tictactoe \
 --network customNet \
 rbayer/gamezone_tictactoe
+
+docker run -d \
+--name gamezone_mongo \
+--network customNet \
+mongo
+
+docker run -d \
+--network customNet \
+--name gamezone_trivia \
+rbayer/gamezone_trivia
 
 docker run -d -p 80:80 \
 -e ADDR=:80 \

@@ -77,7 +77,7 @@ class JoinGameLobby extends Component {
         Object.values(this.state.publicGames).forEach((game) => {
             let gameTypeName = gametypes[game.game_type];
             displayPublicGames.push(
-                <p>
+                <p class="lobby">
                     Game: {gameTypeName.displayName} <br /> 
                     Lobby Capacity: {game.players.length}/{game.capacity} <br />
                     {console.log("adding game object to button")}
