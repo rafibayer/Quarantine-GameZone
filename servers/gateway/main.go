@@ -153,7 +153,7 @@ func main() {
 
 	log.Printf("Server is listening at %s", addr)
 	if localDeploy {
-		log.Println("Deploying using HTTP for local development...")
+		log.Println("Deploying using HTTP for development...")
 		log.Fatal(http.ListenAndServe(addr, wrappedMux))
 	} else {
 		log.Println("Deploying using HTTPS for production...")

@@ -38,7 +38,7 @@ class CreateGameLobby extends Component {
         console.log("checking gametype in state");
         console.log(gameType);
         const sendData = {game_type: gameType, private: isPrivate};
-        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
+        const response = await fetch(api.base + api.handlers.gamelobbies, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({

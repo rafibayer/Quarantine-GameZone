@@ -37,7 +37,7 @@ class TicTacToe extends Component {
 
     // get current game state
     getState = async () => {
-        const response = await fetch(api.testbase + api.handlers.game + this.props.gameID, {
+        const response = await fetch(api.base + api.handlers.game + this.props.gameID, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -57,7 +57,7 @@ class TicTacToe extends Component {
         e.preventDefault();
         var move = JSON.parse(e.target.value);
         const sendData = {row: move.rowPos, col: move.colPos};
-        const response = await fetch(api.testbase + api.handlers.game + this.props.gameID, {
+        const response = await fetch(api.base + api.handlers.game + this.props.gameID, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({

@@ -35,7 +35,7 @@ class JoinGameLobby extends Component {
     
     // gets recent public games for player to join
     getPublicGames = async () => {
-        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
+        const response = await fetch(api.base + api.handlers.gamelobbies, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -56,7 +56,7 @@ class JoinGameLobby extends Component {
         console.log("checking join game game object");
         console.log(game);
         var id = game.lobby_id;
-        const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
+        const response = await fetch(api.base + api.handlers.gamelobby + id, {
             method: "POST",
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")

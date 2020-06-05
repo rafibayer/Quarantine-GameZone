@@ -46,7 +46,7 @@ class Trivia extends Component {
 
     // get current game state
     getState = async () => {
-        const response = await fetch(api.testbase + api.handlers.game + this.props.gameID, {
+        const response = await fetch(api.base + api.handlers.game + this.props.gameID, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -66,7 +66,7 @@ class Trivia extends Component {
         e.preventDefault();
         var answer = e.target.value;
         var sendData = {move: answer};
-        const response = await fetch(api.testbase + api.handlers.game + this.props.gameID, {
+        const response = await fetch(api.base + api.handlers.game + this.props.gameID, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({

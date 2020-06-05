@@ -50,7 +50,7 @@ class GameLobby extends Component {
             this.setGameIsReady(true);
             this.timer = null;
         } else {
-            const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
+            const response = await fetch(api.base + api.handlers.gamelobby + id, {
                 headers: new Headers({
                     "Authorization": localStorage.getItem("Authorization")
                 })
