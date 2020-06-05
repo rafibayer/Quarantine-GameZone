@@ -28,7 +28,7 @@ class CreateGameLobby extends Component {
         e.preventDefault();
         const { gameType } = this.state;
         const sendData = {game_type: gameType };
-        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
+        const response = await fetch(api.base + api.handlers.gamelobbies, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({

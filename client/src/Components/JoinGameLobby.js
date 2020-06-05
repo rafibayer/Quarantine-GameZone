@@ -30,7 +30,7 @@ class JoinGameLobby extends Component {
     
     // gets game lobbies for player to join
     getGameLobbies = async () => {
-        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
+        const response = await fetch(api.base + api.handlers.gamelobbies, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -49,7 +49,7 @@ class JoinGameLobby extends Component {
         e.preventDefault();
         var game = JSON.parse(e.target.value);
         var id = game.lobby_id;
-        const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
+        const response = await fetch(api.base + api.handlers.gamelobby + id, {
             method: "POST",
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
@@ -73,7 +73,7 @@ class JoinGameLobby extends Component {
             players.forEach(player => currentLobbyPlayers += (player + " "));
             let gameTypeName = gametypes[game.game_type];
             displayGames.push(
-                <p>
+                <p class="lobby">
                     Game: {gameTypeName.displayName} <br /> 
                     Lobby Capacity: {players.length}/{game.capacity} <br />
                     Players: {currentLobbyPlayers}

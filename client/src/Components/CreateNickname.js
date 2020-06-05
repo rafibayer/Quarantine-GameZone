@@ -24,7 +24,7 @@ class CreateNickname extends Component {
     // submit nickname form
     submitForm = async (e) => {
         e.preventDefault();
-        const response = await fetch(api.testbase + api.handlers.players, {
+        const response = await fetch(api.base + api.handlers.players, {
             method: "POST",
             body: this.state.nickname,
             headers: new Headers({

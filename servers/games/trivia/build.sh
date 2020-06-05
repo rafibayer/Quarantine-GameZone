@@ -1,2 +1,2 @@
 echo "building trivia server..."
-docker build -t amitgal17/gamezone_trivia .
+docker build -t $DOCKERUSER/gamezone_trivia .
