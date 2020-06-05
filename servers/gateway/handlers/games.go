@@ -14,7 +14,6 @@ import (
 type GameLobby struct {
 	ID       gamesessions.GameSessionID `json:"lobby_id"`
 	GameType string                     `json:"game_type"`
-	Private  bool                       `json:"private"`
 	Players  []sessions.SessionID       `json:"players"`
 	Capacity int                        `json:"capacity"`
 	GameID   string                     `json:"gameID"`
@@ -23,7 +22,6 @@ type GameLobby struct {
 //NewGameLobby struct represents the state of a game lobby, this is created for every game
 type NewGameLobby struct {
 	GameType string `json:"game_type"`
-	Private  bool   `json:"private"`
 }
 
 //ResponseGameLobby struct represents the state of the lobby that is sent to the client, with no session IDs
@@ -31,7 +29,6 @@ type NewGameLobby struct {
 type ResponseGameLobby struct {
 	ID        gamesessions.GameSessionID `json:"lobby_id"`
 	GameType  string                     `json:"game_type"`
-	Private   bool                       `json:"private"`
 	Players   []string                   `json:"players"`
 	Capacity  int                        `json:"capacity"`
 	GameReady bool                       `json:"game_ready"`
@@ -51,7 +48,6 @@ func (ctx *HandlerContext) convertToResponseLobbyForClient(gameLobby GameLobby) 
 	}
 	gameLobbyResponse.ID = gameLobby.ID
 	gameLobbyResponse.GameType = gameLobby.GameType
-	gameLobbyResponse.Private = gameLobby.Private
 	gameLobbyResponse.Capacity = gameLobby.Capacity
 	if len(gameLobby.GameID) > 0 {
 		gameLobbyResponse.GameReady = true

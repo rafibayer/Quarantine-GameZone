@@ -10,7 +10,6 @@ type GameLobbyState struct {
 	// GameLobby struct {
 	// 	ID       GameSessionID `json:"game_id"`
 	// 	GameType string        `json:"game_type"`
-	// 	private  bool          `json:"private"`
 	// 	players  []SessionID   `json:"players"`
 	// } `json: "game_lobby"`
 }

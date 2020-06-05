@@ -32,7 +32,7 @@ const getNicknames = async (players) => {
 //postGameHandler creates a game states and maps it to an ID for that game
 const postGameHandler = async (req, res, next, { GameState }) => {
     let questions = await fetchQuestions(res);
-    const { lobby_id, game_type, private, players, capacity, gameID } = req.body;
+    const { lobby_id, game_type, players, capacity, gameID } = req.body;
     let playersArr = await getNicknames(players);
     const gameState = {
         players: playersArr,
