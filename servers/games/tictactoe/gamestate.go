@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 // Constants for board tokens
@@ -19,12 +20,24 @@ type TicTacToe struct {
 	Xturn   bool      `json:"xturn"`
 	Xid     string    `json:"xid"`
 	Oid     string    `json:"oid"`
+	Xname   string    `json:"xname"`
+	Oname   string    `json:"oname"`
 	Outcome string    `json:"outcome"`
 }
 
 // NewTicTacToe returns a pointer to a new TicTacToe struct
 // for players X and O given their ID's
 func NewTicTacToe(xid string, oid string) *TicTacToe {
+
+	client := &http.Client{}
+	xname, err := GetNickname(xid, client)
+	if err != nil {
+		return nil
+	}
+	oname, err := GetNickname(xid, client)
+	if err != nil {
+		return nil
+	}
 	return &TicTacToe{
 		[3][3]int{
 			{empty, empty, empty},
@@ -34,6 +47,8 @@ func NewTicTacToe(xid string, oid string) *TicTacToe {
 		true,
 		xid,
 		oid,
+		xname,
+		oname,
 		InProgress,
 	}
 }
