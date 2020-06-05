@@ -97,6 +97,7 @@ class Trivia extends Component {
                 </div>
             );
         } else {
+            // get trivia players info
             let playerInfos = gameState.playerInfos;
             let playerDisplays = [];
             for (var i = 0; i < playerInfos.length; i++) {
@@ -111,6 +112,8 @@ class Trivia extends Component {
                     }
                 }
             }
+            // checks to see if the game has ended
+            // display final scoreboard
             if (outcome === "ended") {
                 clearInterval(this.timer);
                 return(
@@ -122,6 +125,8 @@ class Trivia extends Component {
                     </div>
                 );
             } else {
+                // in progress game
+                // display current score board and answer buttons 
                 let answerBtns = [];
                 let activeQuestion = gameState.activeQuestion;
                 let currentQuestionNumber = gameState.questionNumber;
