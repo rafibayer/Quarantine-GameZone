@@ -11,6 +11,7 @@ class Trivia extends Component {
         this.state = {
             gameState: null,
             loading: true,
+            outcome: "",
             error: ""
         }
         this.timer = setInterval(() => this.getState(), 2000);
@@ -31,7 +32,7 @@ class Trivia extends Component {
 
     // sets current game state
     setGameState = (gameState) => {
-        this.setState({gameState: gameState, loading: false, error: ""});
+        this.setState({gameState: gameState, loading: false, outcome: gameState.outcome, error: ""});
     }
 
     // set whether to reload question display
@@ -86,7 +87,7 @@ class Trivia extends Component {
 
     render() {
         // make the display board from current game state
-        const { gameState, loading, error } = this.state;
+        const { gameState, loading, outcome, error } = this.state;
 
         // checks to see if the first get has finished first
         if (loading) {
@@ -95,34 +96,51 @@ class Trivia extends Component {
                     Entering Game...
                 </div>
             );
-        }
-        let playerInfos = gameState.playerInfos;
-        let playerDisplays = [];
-        for (var i = 0; i < playerInfos.length; i++) {
-            var playerInfo = playerInfos[i];
-            if (playerInfo.alreadyAnswered) {
-                playerDisplays.push(<p>{playerInfo.nickname}: {playerInfo.score}</p>)
+        } else {
+            let playerInfos = gameState.playerInfos;
+            let playerDisplays = [];
+            for (var i = 0; i < playerInfos.length; i++) {
+                var playerInfo = playerInfos[i];
+                if (playerInfo.alreadyAnswered) {
+                    playerDisplays.push(<p>{playerInfo.nickname}: {playerInfo.score}</p>)
+                } else {
+                    if (outcome === "ended") {
+                        playerDisplays.push(<p>{playerInfo.nickname}: {playerInfo.score}</p>);
+                    } else {
+                        playerDisplays.push(<p><FontAwesomeIcon icon={faHourglass} /> {playerInfo.nickname}: {playerInfo.score}</p>);
+                    }
+                }
+            }
+            if (outcome === "ended") {
+                clearInterval(this.timer);
+                return(
+                    <div>
+                        <Errors error={error} setError={this.setError} />
+                        <h1>Trivia</h1>
+                        <h2>Final Score Board</h2>
+                        <div>{playerDisplays}</div>
+                    </div>
+                );
             } else {
-                playerDisplays.push(<p><FontAwesomeIcon icon={faHourglass} /> {playerInfo.nickname}: {playerInfo.score}</p>);
+                let answerBtns = [];
+                let activeQuestion = gameState.activeQuestion;
+                let currentQuestionNumber = gameState.questionNumber;
+                let answers = activeQuestion.answers;
+                for (var i = 0; i < answers.length; i++) {
+                    answerBtns.push(<button id="trivia-answer-btn" value={i} onClick={this.makeMove}>{atob(answers[i])}</button>);
+                }
+                return(
+                    <div>
+                        <Errors error={error} setError={this.setError} />
+                        <h1>Trivia</h1>
+                        <h2>Score Board</h2>
+                        <div>{playerDisplays}</div>
+                        <h2>Question {currentQuestionNumber + 1}: {atob(activeQuestion.question)}</h2>
+                        {answerBtns}
+                    </div>
+                );
             }
         }
-        let answerBtns = [];
-        let activeQuestion = gameState.activeQuestion;
-        let currentQuestionNumber = gameState.questionNumber;
-        let answers = activeQuestion.answers;
-        for (var i = 0; i < answers.length; i++) {
-            answerBtns.push(<button id="trivia-answer-btn" value={i} onClick={this.makeMove}>{atob(answers[i])}</button>);
-        }
-        return(
-            <div>
-                <Errors error={error} setError={this.setError} />
-                <h1>Trivia</h1>
-                <h2>Score Board</h2>
-                <div>{playerDisplays}</div>
-                <h2>Question {currentQuestionNumber + 1}: {atob(activeQuestion.question)}</h2>
-                {answerBtns}
-            </div>
-        );
     }
 }
 

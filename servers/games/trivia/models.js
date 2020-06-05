@@ -14,6 +14,7 @@ const gameStateSchema = new Schema({
     players: {type: [playerType], required: true},
     counter: { type: Number, required: true },
     questionBank: { type: [questionType], required: true },
+    outcome: { type: String, required: true },
 });
 
 module.exports = { gameStateSchema };
