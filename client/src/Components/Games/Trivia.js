@@ -122,6 +122,7 @@ class Trivia extends Component {
                         <h1>Trivia</h1>
                         <h2>Final Score Board</h2>
                         <div>{playerDisplays}</div>
+                        <LeaveGameLobby removeGameLobby={this.props.removeGameLobby}></LeaveGameLobby>
                     </div>
                 );
             } else {

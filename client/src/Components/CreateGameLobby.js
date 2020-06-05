@@ -9,16 +9,8 @@ class CreateGameLobby extends Component {
         super(props);
         this.state = {
             gameType: "tictactoe",
-            isPrivate: false,
             error: ""
         };
-    }
-
-    // handles changes to private public radio buttons
-    handleChange = () => {
-        this.setState({
-            isPrivate: !this.state.isPrivate
-        });
     }
 
     // handles select change
@@ -34,10 +26,8 @@ class CreateGameLobby extends Component {
     // submit new game form
     submitForm = async (e) => {
         e.preventDefault();
-        const { gameType, isPrivate } = this.state;
-        console.log("checking gametype in state");
-        console.log(gameType);
-        const sendData = {game_type: gameType, private: isPrivate};
+        const { gameType } = this.state;
+        const sendData = {game_type: gameType };
         const response = await fetch(api.testbase + api.handlers.gamelobbies, {
             method: "POST",
             body: JSON.stringify(sendData),
@@ -61,8 +51,6 @@ class CreateGameLobby extends Component {
         let games = [];
         Object.values(gametypes).forEach((gameType) => {
             games.push(<option value={gameType.gameType}>{gameType.displayName}</option>);
-            console.log("checking adding values to select");
-            console.log(gameType.gameType);
         });
         const { error } = this.state;
         return(
@@ -71,10 +59,6 @@ class CreateGameLobby extends Component {
                 <h1>Create a New Game</h1>
                 <form>
                     <div>
-                        <input type="radio" id="public" name="publicgame" value="public" checked={!this.state.private} onChange={this.handleChange}></input>
-                        <label for="public">Public</label>
-                        <input type="radio" id="private" name="publicgame" value="private" checked={this.state.private} onChange={this.handleChange}></input>
-                        <label for="private">Private</label>
                         <select onChange={this.handleSelect}>
                             {games}
                         </select>

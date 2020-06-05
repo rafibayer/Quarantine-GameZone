@@ -7,24 +7,19 @@ class JoinGameLobby extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            publicGames: {},
+            gameLobbies: {},
             error: ""
         }
-        this.timer = setInterval(() => this.getPublicGames(), 8000);
-    }
-
-
-    componentWillMount() {
-        console.log("public game lobby polling has begun");
+        this.timer = setInterval(() => this.getGameLobbies(), 5000);
     }
 
     componentWillUnmount() {
         clearInterval(this.timer);
     }
 
-    // sets public games
-    setPublicGames = (games) => {
-        this.setState({publicGames: games})
+    // sets game lobbies to join
+    setGameLobbies = (games) => {
+        this.setState({gameLobbies: games})
     }
 
     // set error message
@@ -33,8 +28,8 @@ class JoinGameLobby extends Component {
     }
 
     
-    // gets recent public games for player to join
-    getPublicGames = async () => {
+    // gets game lobbies for player to join
+    getGameLobbies = async () => {
         const response = await fetch(api.testbase + api.handlers.gamelobbies, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
@@ -46,11 +41,11 @@ class JoinGameLobby extends Component {
             return;
         }
         const games = await response.json();
-        this.setPublicGames(games);
+        this.setGameLobbies(games);
     }
 
     // join game 
-    joinGame = async (e) => {
+    joinGameLobby = async (e) => {
         e.preventDefault();
         var game = JSON.parse(e.target.value);
         console.log("checking join game game object");
@@ -72,17 +67,20 @@ class JoinGameLobby extends Component {
     }
 
     render() {
-        // get public games to display
-        let displayPublicGames = [];
-        Object.values(this.state.publicGames).forEach((game) => {
+        // get game lobbies to display
+        let displayGames = [];
+        Object.values(this.state.gameLobbies).forEach((game) => {
+            let currentLobbyPlayers = "";
+            let players = game.players;
+            players.forEach(player => currentLobbyPlayers += (player + " "));
             let gameTypeName = gametypes[game.game_type];
-            displayPublicGames.push(
+            displayGames.push(
                 <p>
                     Game: {gameTypeName.displayName} <br /> 
-                    Lobby Capacity: {game.players.length}/{game.capacity} <br />
-                    {console.log("adding game object to button")}
-                    {console.log(game)}
-                    <button value={JSON.stringify(game)} onClick={this.joinGame}>Join</button>
+                    Lobby Capacity: {players.length}/{game.capacity} <br />
+                    Players: {currentLobbyPlayers}
+                    <br />
+                    <button value={JSON.stringify(game)} onClick={this.joinGameLobby}>Join</button>
                 </p>
             );
         });
@@ -90,8 +88,8 @@ class JoinGameLobby extends Component {
         return(
             <div>
                 <Errors error={error} setError={this.setError} />
-                <h1>Join a Public Game</h1>
-                <div>{displayPublicGames}</div>
+                <h1>Join a Game</h1>
+                <div>{displayGames}</div>
             </div>
 
         );
