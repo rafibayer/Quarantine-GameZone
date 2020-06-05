@@ -15,7 +15,6 @@ import (
 type GameLobby struct {
 	ID       string   `json:"lobby_id"`
 	GameType string   `json:"game_type"`
-	Private  bool     `json:"private"`
 	Players  []string `json:"players"`
 	Capacity int      `json:"capacity"`
 	GameID   string   `json:"gameID"`

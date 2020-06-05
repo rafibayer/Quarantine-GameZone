@@ -152,17 +152,16 @@ func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *htt
 	}
 	gameLobby := GameSessionState.GameLobby
 
-	//check if game is private, if it is then only response with struct if player is a current game player
+	// only respond with struct if player is a current game player
 	isMember := false
-	if GameSessionState.GameLobby.Private {
-		for _, player := range GameSessionState.GameLobby.Players {
-			if player == playerSessionID {
-				isMember = true
-			}
+	for _, player := range GameSessionState.GameLobby.Players {
+		if player == playerSessionID {
+			isMember = true
 		}
 	}
-	if !isMember && GameSessionState.GameLobby.Private {
-		http.Error(w, "This game is private, you must be a current player to view it", http.StatusUnauthorized)
+
+	if !isMember {
+		http.Error(w, "you must be a current player to this game", http.StatusUnauthorized)
 		return
 	}
 
