@@ -16,11 +16,7 @@ class Trivia extends Component {
         }
         this.timer = setInterval(() => this.getState(), 2000);
     }
-
-    componentWillMount() {
-        console.log("game trivia has began polling");
-    }
-
+    
     componentWillUnmount() {
         clearInterval(this.timer);
     }

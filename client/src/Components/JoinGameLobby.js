@@ -48,8 +48,6 @@ class JoinGameLobby extends Component {
     joinGameLobby = async (e) => {
         e.preventDefault();
         var game = JSON.parse(e.target.value);
-        console.log("checking join game game object");
-        console.log(game);
         var id = game.lobby_id;
         const response = await fetch(api.testbase + api.handlers.gamelobby + id, {
             method: "POST",

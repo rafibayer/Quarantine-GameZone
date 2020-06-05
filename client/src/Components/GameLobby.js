@@ -19,11 +19,6 @@ class GameLobby extends Component {
         this.timer = setInterval(() => this.getGameLobby(), 3000);
     }
 
-    // polling
-    componentDidMount() {
-        console.log("polling has began");
-    }
-
     componentWillUnmount() {
         this.timer = null;
     }
