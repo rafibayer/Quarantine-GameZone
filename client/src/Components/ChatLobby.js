@@ -18,6 +18,7 @@ class ChatLobby extends Component {
     this.ws.send(this.state.message);
   }
 
+  //fix chat div
   render() {
     return(
       <div>

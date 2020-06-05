@@ -81,6 +81,7 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, ss)
 	if err != nil {
 		http.Error(w, "Failed to get state", 500)
+		return
 	}
 
 	ctx.Notifier.InsertConnection(conn, string(id))
@@ -96,6 +97,7 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 				_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, ss)
 				if err != nil {
 					http.Error(w, "Failed to get state", 500)
+					return
 				}
 				msgStr := fmt.Sprintf("%s: %s", ss.Nickname, string(p))
 
