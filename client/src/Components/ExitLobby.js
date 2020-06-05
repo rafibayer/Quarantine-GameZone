@@ -17,7 +17,7 @@ class ExitLobby extends Component {
 
     handleExit = async (e) => {
         e.preventDefault();
-        const response = await fetch(api.testbase + api.handlers.player, {
+        const response = await fetch(api.base + api.handlers.player, {
             method: "DELETE",
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")

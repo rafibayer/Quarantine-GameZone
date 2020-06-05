@@ -31,6 +31,9 @@ func activateGame(lobby *GameLobby, sessID sessions.SessionID) (map[string]inter
 
 	resp, err := http.Post(Endpoints[lobby.GameType], "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
+		log.Println(err)
+		log.Println(Endpoints[lobby.GameType])
+		log.Println(lobby.GameType)
 		return nil, err
 	}
 
@@ -89,6 +92,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 	gameLobby.Players = playersSlice
 	_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, gameLobbyState, w, gameIDType)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
@@ -100,6 +104,7 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 		// <- client
 		result, err := activateGame(gameLobby, gameLobby.Players[0])
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
@@ -147,17 +152,16 @@ func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *htt
 	}
 	gameLobby := GameSessionState.GameLobby
 
-	//check if game is private, if it is then only response with struct if player is a current game player
+	// only respond with struct if player is a current game player
 	isMember := false
-	if GameSessionState.GameLobby.Private {
-		for _, player := range GameSessionState.GameLobby.Players {
-			if player == playerSessionID {
-				isMember = true
-			}
+	for _, player := range GameSessionState.GameLobby.Players {
+		if player == playerSessionID {
+			isMember = true
 		}
 	}
-	if !isMember && GameSessionState.GameLobby.Private {
-		http.Error(w, "This game is private, you must be a current player to view it", http.StatusUnauthorized)
+
+	if !isMember {
+		http.Error(w, "you must be a current player to this game", http.StatusUnauthorized)
 		return
 	}
 

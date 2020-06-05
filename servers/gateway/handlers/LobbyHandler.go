@@ -44,7 +44,6 @@ func (ctx *HandlerContext) LobbyHandlerPost(w http.ResponseWriter, r *http.Reque
 	gameLobby := &GameLobby{}
 	if gameCapacity, Ok := GameCapacity[newGameLobby.GameType]; Ok {
 		gameLobby.GameType = newGameLobby.GameType
-		gameLobby.Private = newGameLobby.Private
 		gameLobby.Capacity = gameCapacity
 		gameLobby.Players = playersSlice
 	} else {
@@ -125,7 +124,7 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		// 	http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		// 	return
 		// }
-		if !gLobbyState.GameLobby.Private && len(gLobbyState.GameLobby.GameID) == 0 {
+		if len(gLobbyState.GameLobby.GameID) == 0 {
 			lobby, err := ctx.convertToResponseLobbyForClient(*gLobbyState.GameLobby)
 			if err != nil {
 				http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)

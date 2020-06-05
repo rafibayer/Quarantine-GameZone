@@ -1,0 +1,28 @@
+html {
+    background-color: #f78888;
+}
+
+body {
+    padding-top: 10%;
+    height: 100vh;
+    font-family: Lato, sans-serif;
+    text-align: center;
+    margin-left: 25%;
+    margin-right: 25%;
+    color: white;
+    background-color: black;
+}
+
+button, input {
+    border-radius: 5%;
+    padding: 1%;
+    margin-bottom: 5%;
+}
+
+.lobby {
+    margin-bottom: 2%;
+    padding-top: 3%;
+    padding-bottom: 3%;
+    box-shadow: 2px 2px 2px 2px gray;
+    border-radius: 2%;
+}

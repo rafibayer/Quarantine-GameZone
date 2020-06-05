@@ -9,21 +9,13 @@ class CreateGameLobby extends Component {
         super(props);
         this.state = {
             gameType: "tictactoe",
-            isPrivate: false,
             error: ""
         };
     }
 
-    // handles changes to private public radio buttons
-    handleChange = () => {
-        this.setState({
-            isPrivate: !this.state.isPrivate
-        });
-    }
-
     // handles select change
     handleSelect = (e) => {
-        this.setState({game_type: e.target.value});
+        this.setState({gameType: e.target.value});
     }
 
     // set error message
@@ -34,9 +26,9 @@ class CreateGameLobby extends Component {
     // submit new game form
     submitForm = async (e) => {
         e.preventDefault();
-        const { gameType, isPrivate } = this.state;
-        const sendData = {game_type: gameType, private: isPrivate};
-        const response = await fetch(api.testbase + api.handlers.gamelobbies, {
+        const { gameType } = this.state;
+        const sendData = {game_type: gameType };
+        const response = await fetch(api.base + api.handlers.gamelobbies, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({
@@ -67,10 +59,6 @@ class CreateGameLobby extends Component {
                 <h1>Create a New Game</h1>
                 <form>
                     <div>
-                        <input type="radio" id="public" name="publicgame" value="public" checked={!this.state.private} onChange={this.handleChange}></input>
-                        <label for="public">Public</label>
-                        <input type="radio" id="private" name="publicgame" value="private" checked={this.state.private} onChange={this.handleChange}></input>
-                        <label for="private">Private</label>
                         <select onChange={this.handleSelect}>
                             {games}
                         </select>

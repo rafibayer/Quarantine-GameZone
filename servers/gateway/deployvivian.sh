@@ -2,6 +2,10 @@ echo "DEPLOYING LOCALLY"
 
 cd ../games/tictactoe
 sh ./buildvivian.sh
+
+cd ../trivia
+sh ./buildvivian.sh
+
 cd ../../gateway
 sh ./buildvivian.sh
 
@@ -9,6 +13,7 @@ sh ./buildvivian.sh
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
 docker rm -f gamezone_tictactoe
+docker rm -f gamezone_trivia
 
 export REDISADDR=gamezone_redis:6379
 export TLSKEY=LOCALDEPLOY
@@ -30,6 +35,18 @@ docker run -d \
 --name gamezone_tictactoe \
 --network customNet \
 viviancarolinehua/gamezone_tictactoe
+
+docker rm -f gamezone_mongo
+docker run -d \
+--name gamezone_mongo \
+--network customNet \
+mongo
+
+docker rm -f gamezone_trivia
+docker run -d \
+--network customNet \
+--name gamezone_trivia \
+viviancarolinehua/gamezone_trivia
 
 docker run -d -p 80:80 \
 -e ADDR=:80 \

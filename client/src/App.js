@@ -3,6 +3,7 @@ import CreateNickname from './Components/CreateNickname.js'
 import MainLobby from './Components/MainLobby.js'
 import Errors from './Components/Errors.js'
 import api from './Constants/Endpoints.js';
+import './Styles/App.css';
 
 import './App.css';
 
@@ -26,7 +27,7 @@ class App extends Component {
     if (!this.state.authToken) {
       return;
     }
-    const response = await fetch(api.testbase + api.handlers.player, {
+    const response = await fetch(api.base + api.handlers.player, {
       headers: new Headers({
           "Authorization": this.state.authToken
       })
