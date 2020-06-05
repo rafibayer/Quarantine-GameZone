@@ -10,7 +10,16 @@ class JoinGameLobby extends Component {
             publicGames: {},
             error: ""
         }
-        this.getPublicGames();
+        this.timer = setInterval(() => this.getPublicGames(), 8000);
+    }
+
+
+    componentWillMount() {
+        console.log("public game lobby polling has begun");
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timer);
     }
 
     // sets public games

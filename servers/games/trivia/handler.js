@@ -118,7 +118,7 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
         if (!req.get("Authorization")) {
             return res.status(401).send("unauthorized access");
         }
-        if (gameState.counter == gameState.questionBank.length) {
+        if (gameState.counter == gameState.questionBank.length - 1) {
             return res.status(400).send("The game ended")
         }
         let auth = req.get("Authorization").split(" ")[1];
@@ -161,7 +161,7 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
 //gets 10 easy multipule choice questions from opentdb
 const fetchQuestions = async (res) => {
     try {
-        const response = await fetch("https://opentdb.com/api.php?amount=10&difficulty=easy&type=multiple");
+        const response = await fetch("https://opentdb.com/api.php?amount=10&difficulty=easy&type=multiple&encode=base64");
         let data = await response.json();
         let questions = processDataFromTriviaAPI(data.results, res);
         return questions

@@ -1,6 +1,6 @@
 export default {
     tictactoe: {
-        displayName: "Tic Tac Toe",
+        displayName: "Tic-Tac-Toe",
         gameType: "tictactoe"
     },
     trivia:  {

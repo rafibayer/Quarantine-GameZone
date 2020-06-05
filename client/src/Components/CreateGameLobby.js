@@ -23,7 +23,7 @@ class CreateGameLobby extends Component {
 
     // handles select change
     handleSelect = (e) => {
-        this.setState({game_type: e.target.value});
+        this.setState({gameType: e.target.value});
     }
 
     // set error message
@@ -35,6 +35,8 @@ class CreateGameLobby extends Component {
     submitForm = async (e) => {
         e.preventDefault();
         const { gameType, isPrivate } = this.state;
+        console.log("checking gametype in state");
+        console.log(gameType);
         const sendData = {game_type: gameType, private: isPrivate};
         const response = await fetch(api.testbase + api.handlers.gamelobbies, {
             method: "POST",
@@ -59,6 +61,8 @@ class CreateGameLobby extends Component {
         let games = [];
         Object.values(gametypes).forEach((gameType) => {
             games.push(<option value={gameType.gameType}>{gameType.displayName}</option>);
+            console.log("checking adding values to select");
+            console.log(gameType.gameType);
         });
         const { error } = this.state;
         return(
