@@ -11,7 +11,7 @@ ssh -i ~/.ssh/aws ec2-user@rafibayer.me << EOF
 
     docker run  \
     -d \
-    -p 3000:80 \
+    -p 80:80 \
     --name gamezone_client \
     $DOCKERUSER/gamezone_client
 
