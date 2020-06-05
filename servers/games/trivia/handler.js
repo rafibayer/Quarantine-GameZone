@@ -1,10 +1,10 @@
 const fetch = require("node-fetch");
-const redis = require('redis');
 const config = require('./config');
-const http = require('http');
 const axios = require("axios")
 
-const loop = async (players) => {
+//gets the nicknames that corespond to the sessionIDs from the game lobby
+// this is in order to display the nicknames back to the user in the response
+const getNicknames = async (players) => {
     playersArr = Promise.all(players.map(async (p, i) => {
         const options = {
             headers: {
@@ -29,10 +29,11 @@ const loop = async (players) => {
     return await playersArr;
 }
 
+//postGameHandler creates a game states and maps it to an ID for that game
 const postGameHandler = async (req, res, next, { GameState }) => {
     let questions = await fetchQuestions(res);
     const { lobby_id, game_type, private, players, capacity, gameID } = req.body;
-    let playersArr = await loop(players);
+    let playersArr = await getNicknames(players);
     const gameState = {
         players: playersArr,
         counter: 0,
@@ -41,7 +42,6 @@ const postGameHandler = async (req, res, next, { GameState }) => {
     const saveGameState = new GameState(gameState);
     saveGameState.save((err, newGameState) => {
         if (err) {
-            console.log(err)
             res.status(500).send('Unable to create a trivia game');
             return;
         }
@@ -52,12 +52,10 @@ const postGameHandler = async (req, res, next, { GameState }) => {
     })
 }
 
-
 //getSpecificGameHandler gets the gameID from url, and fetches the game state,
 // parsing into a response that includes an active question, non-sensitive player info and counter
 // it also makes sure to shuffle the answers for the active question
 const getSpecificGameHandler = async (req, res, next, { GameState }) => {
-    console.log("gameID: (" + req.params.gameid + ")");
     GameState.findOne({ _id: req.params.gameid }).exec().then(gameState => {
         if (gameState == undefined) {
             return res.status(400).send("game wasn't found");
@@ -75,15 +73,13 @@ const getSpecificGameHandler = async (req, res, next, { GameState }) => {
             return res.status(401).send("unauthorized access")
         }
     }).catch(err => {
-        console.log("error message inside catch: ", err);
         return res.status(404).send("couldn't find trivia game");
     })
 }
 
-//method converst the gamestate into a respone json for client,
+//method converts the gamestate into a respone json for client,
 //  includes active question with no answer and non-sensitive player info
 const convertToResponseGamestate = (gameState) => {
-    // get next active question, and shuffle answers
     let activeQuestion = gameState.questionBank[gameState.counter];
     let playerResponseInfo = [];
     gameState.players.forEach(p => {
@@ -112,6 +108,8 @@ const shuffle = (array) => {
     }
 }
 
+//accepts a user answer and updates the gamestate accordingly with who answered
+// and user score. Question is incremented when all players have posted their answer
 const postSpecificGameHandler = async (req, res, next, { GameState }) => {
     GameState.findOne({_id: req.params.gameid}).exec().then(gameState => {
         if (gameState == undefined) {
@@ -120,7 +118,7 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
         if (!req.get("Authorization")) {
             return res.status(401).send("unauthorized access");
         }
-        if (gameState.counter == gameState.questionBank.length) {
+        if (gameState.counter == gameState.questionBank.length - 1) {
             return res.status(400).send("The game ended")
         }
         let auth = req.get("Authorization").split(" ")[1];
@@ -130,10 +128,7 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
             if (currPlayer.alreadyAnswered) {
                 return res.status(400).send("this player has already answered");
             }
-            console.log(req.body);
-            console.log(req.body.move);
             let answerIndex = Number(String((req.body.move)));
-            console.log("type of answer: ", typeof answerIndex);
             if (typeof answerIndex != "number") {
                 return res.status(400).send("answer must be a number");
             }
@@ -163,14 +158,14 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
     })
 }
 
+//gets 10 easy multipule choice questions from opentdb
 const fetchQuestions = async (res) => {
     try {
-        const response = await fetch("https://opentdb.com/api.php?amount=10&difficulty=easy&type=multiple");
+        const response = await fetch("https://opentdb.com/api.php?amount=10&difficulty=easy&type=multiple&encode=base64");
         let data = await response.json();
         let questions = processDataFromTriviaAPI(data.results, res);
         return questions
     } catch (err) {
-        console.log(err);
         return res.status(500).send("internal server error, couldn't get questions for trivia 2");
     }
 }
@@ -188,9 +183,7 @@ const processDataFromTriviaAPI = (json, res) => {
                 answers: ([...q.incorrect_answers].concat(q.correct_answer)),
                 correctAnswer: q.correct_answer,
             }
-            console.log("before shuffling: ", question.answers)
             shuffle(question.answers)
-            console.log("after shuffling: ", question.answers)
             questionBank.push(question);
         });
     }

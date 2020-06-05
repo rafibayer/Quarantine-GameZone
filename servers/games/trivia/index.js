@@ -1,8 +1,6 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const config = require('./config');
-const http = require('http');
-
 const { gameStateSchema } = require('./models');
 const { postGameHandler, getSpecificGameHandler, postSpecificGameHandler } = require('./handler');
 
@@ -39,7 +37,7 @@ app.post("/v1/trivia", RequestWrapper(postGameHandler, { GameState }));
 app.get("/v1/trivia/:gameid", RequestWrapper(getSpecificGameHandler, { GameState }));
 app.post("/v1/trivia/:gameid", RequestWrapper(postSpecificGameHandler, { GameState }));
 
-var listener = app.listen(4000, function () {
+var listener = app.listen(port, function () {
     console.log('Listening on port ' + listener.address().port);
 })
 
