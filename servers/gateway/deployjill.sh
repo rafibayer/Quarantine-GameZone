@@ -4,6 +4,7 @@ echo "DEPLOYING LOCALLY"
 
 docker rm -f gamezone_gateway
 docker rm -f gamezone_redis
+docker rm -f gamezone_tictactoe
 docker rm -f gamezone_rabbit
 
 export REDISADDR=gamezone_redis:6379
@@ -27,7 +28,7 @@ docker run -d \
   -e REDISADDR=gamezone_redis:6379 \
   --name gamezone_tictactoe \
   --network customNet \
-  janguy/gamezone_tictactoe
+  amitgal17/gamezone_tictactoe
 
 docker run -d \
   --name gamezone_rabbit \
@@ -47,7 +48,7 @@ docker run -d -p 80:80 \
   --name gamezone_gateway \
   --network customNet \
   --restart unless-stopped \
-  janguy/gamezone_gateway
+  amitgal17/gamezone_gateway
 
 docker logs gamezone_gateway
 

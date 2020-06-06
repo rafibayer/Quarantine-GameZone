@@ -93,48 +93,28 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	//gameLobbyStates := (make([]interface{}, 0))
-	var gameLobbyStates map[string]string
-	res, err := gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
+	res, err := gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		return
 	}
-	// make list of public lobbies
 	resultLobbies := make([]ResponseGameLobby, 0)
 	for _, element := range res {
-		type respLobby struct {
-			StartTime time.Time
-			GameLobby *GameLobby
-		}
-		rLobby := respLobby{}
-		err := json.Unmarshal([]byte(element), &rLobby)
+		gameLobby := GameLobby{}
+		res, err := json.Marshal(element)
 		if err != nil {
-			log.Println(err.Error())
+			log.Println(err)
+			http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
+		}
+		err = json.Unmarshal(res, &gameLobby)
+		lobby, err := ctx.convertToResponseLobbyForClient(gameLobby)
+		if err != nil {
 			http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 			return
 		}
-		gLobbyState := GameLobbyState{}
-		gLobbyState.StartTime = rLobby.StartTime
-		gLobbyState.GameLobby = rLobby.GameLobby
-
-		// lobbyState, ok := rLobby.(GameLobbyState) // Cast interface into concrete type
-		// if !ok {
-		// 	log.Println("Error casting interface into GameLobbyState")
-		// 	http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
-		// 	return
-		// }
-		if len(gLobbyState.GameLobby.GameID) == 0 {
-			lobby, err := ctx.convertToResponseLobbyForClient(*gLobbyState.GameLobby)
-			if err != nil {
-				http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
-				return
-			}
-			resultLobbies = append(resultLobbies, *lobby)
-		}
+		resultLobbies = append(resultLobbies, *lobby)
 	}
-
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	encoder := json.NewEncoder(w)

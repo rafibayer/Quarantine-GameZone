@@ -174,3 +174,76 @@ func (ctx *HandlerContext) SpecificLobbyHandlerGet(w http.ResponseWriter, r *htt
 		return
 	}
 }
+
+func (ctx *HandlerContext) SpecificLobbyHandlerPatch(w http.ResponseWriter, r *http.Request) {
+	SessionState := SessionState{}
+	playerSessionID, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, &SessionState)
+	if err != nil {
+		http.Error(w, "Please create a nickname to start your playing experience", http.StatusUnauthorized)
+		return
+	}
+
+	GameSessionState := GameLobbyState{}
+	gameSessionID, err := gamesessions.GetGameState(r, ctx.SigningKey, ctx.GameSessionStore, &GameSessionState)
+	if err != nil {
+		http.Error(w, "game session doesn't exist", http.StatusUnauthorized)
+		return
+	}
+	gameLobby := GameSessionState.GameLobby
+
+	// only respond with struct if player is a current game player
+	isMember := false
+	for _, player := range GameSessionState.GameLobby.Players {
+		if player == playerSessionID {
+			isMember = true
+		}
+	}
+	if !isMember {
+		http.Error(w, "you must be a current player to this game", http.StatusUnauthorized)
+		return
+	}
+
+	//remove the playersessionId from the players array in the game lobby and save it again?
+	playersSlice := gameLobby.Players[:]
+	for i, player := range playersSlice {
+		if player == playerSessionID {
+			playersSlice[i] = playersSlice[len(playersSlice)-1]
+			playersSlice = playersSlice[:len(playersSlice)-1]
+		}
+	}
+
+	if len(playersSlice) == 0 {
+		_, err := gamesessions.EndGameSession(r, ctx.SigningKey, ctx.GameSessionStore)
+		if err != nil {
+			http.Error(w, "issue deleting lobby", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "plain/text")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("lobby session deleted"))
+		return
+	}
+
+	gameLobby.Players = playersSlice
+	_, err = gamesessions.UpdateGameSession(ctx.SigningKey, ctx.GameSessionStore, GameSessionState, w, gameSessionID)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	ResponseGameLobby, err := ctx.convertToResponseLobbyForClient(*gameLobby)
+	if err != nil {
+		http.Error(w, "Please make sure all game players have a nickname", http.StatusUnauthorized)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	encoder := json.NewEncoder(w)
+	err = encoder.Encode(ResponseGameLobby)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+}
