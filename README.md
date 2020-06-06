@@ -1,4 +1,4 @@
-# Project: Quarantine Game-Zone
+# Project: Quarantine GameZone
 
 Group Members: Jill, Vivian, Rafael, & Amit
 
