@@ -185,12 +185,6 @@ move: {
 ## Infrastructure diagram
 
 
-<div style="width: 640px; height: 480px; margin: 10px; position: relative;">
-    <iframe allowfullscreen frameborder="0" style="width:640px; height:480px" src="https://app.lucidchart.com/documents/embeddedchart/07329627-2d6b-434f-94e7-98b5b123cc12" id="HFE53Cgk7Oao">
-    </iframe>
-</div>
-
-
 
 
 
