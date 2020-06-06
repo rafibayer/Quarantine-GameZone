@@ -166,17 +166,29 @@ move: {
 }
 ```
 
-Use cases and priority:  
+## Use cases and priority:  
 
-![Use cases](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/use.JPG)
+| Priority | User        | Description                               |
+|----------|-------------|-------------------------------------------|
+| P0       | As a player | I want to be able to create a nickname    |
+| P0       | As a player | I want to be able to make a new game      |
+| P0       | As a player | I want to be able to join a game          |
+| P0       | As a player | I want to be able to see games I can join |
+| P0       | As a player | I want to be able to play a game          |
+| P1       | As a player | I want to exit a game lobby               |
+| P1       | As a player | I want to exit a game after completion    |
+| P1       | As a player | I want to see the result of the game      |
+| P1       | As a player | I want to select different types of games |
+| P2       | As a player | I want to chat with players in the lobby  |
 
 
-Infrastructure diagram
+## Infrastructure diagram
 
-https://app.lucidchart.com/invitations/accept/ffb7c05e-ab8e-4cce-aa82-9e2046c505b6
 
-![infrastructure](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/Infrastructure%20Diagram.jpeg)
-
+<div style="width: 640px; height: 480px; margin: 10px; position: relative;">
+    <iframe allowfullscreen frameborder="0" style="width:640px; height:480px" src="https://app.lucidchart.com/documents/embeddedchart/07329627-2d6b-434f-94e7-98b5b123cc12" id="HFE53Cgk7Oao">
+    </iframe>
+</div>
 
 
 
