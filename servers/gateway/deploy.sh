@@ -3,6 +3,9 @@ export DOCKERUSER=rbayer
 export REDISADDR=gamezone_redis:6379
 export SESSIONKEY=mysesskeyhehe
 
+export RABBITADDR=amqp://gamezone_rabbit:5672
+export RABBITNAME="gamezone_rabbit"
+
 echo "DEPLOYING LIVE ON **HTTPS**"
 
 # gateway
@@ -30,9 +33,9 @@ ssh -i ~/.ssh/aws ec2-user@api.rafibayer.me << EOF
     docker rm -f gamezone_gateway
     docker rm -f gamezone_tictactoe
     docker rm -f gamezone_trivia
-    docker rm -f gamezone_tictactoe
     docker rm -f gamezone_mongo
     docker rm -f gamezone_redis
+    docker rm -f gamezone_rabbit
 
     #echo "CLEANINING"
     #docker system prune -af
@@ -71,6 +74,16 @@ ssh -i ~/.ssh/aws ec2-user@api.rafibayer.me << EOF
     --name gamezone_trivia \
     $DOCKERUSER/gamezone_trivia
 
+    # rabbit
+    docker run -d \
+    --name gamezone_rabbit \
+    --network customNet \
+    -p 5672:5672 \
+    -p 15672:15672 \
+    rabbitmq:3-management
+
+
+
     # gateway
     docker run -d -p 443:443 \
     -e ADDR=:443 \
@@ -78,10 +91,13 @@ ssh -i ~/.ssh/aws ec2-user@api.rafibayer.me << EOF
     -e TLSKEY=/etc/letsencrypt/live/api.rafibayer.me/privkey.pem \
     -e TLSCERT=/etc/letsencrypt/live/api.rafibayer.me/fullchain.pem \
     -e SESSIONKEY=myverysecuresessionkey \
+    -e RABBITADDR=$RABBITADDR \
+    -e RABBITNAME=$RABBITNAME \
     -v /etc/letsencrypt/:/etc/letsencrypt/:ro \
     -e PROD=1 \
     --name gamezone_gateway \
     --network customNet \
+    --restart unless-stopped \
     $DOCKERUSER/gamezone_gateway
 
     docker logs gamezone_gateway

@@ -4,84 +4,15 @@ import (
 	"Quarantine-GameZone-441/servers/gateway/gamesessions"
 	"Quarantine-GameZone-441/servers/gateway/handlers"
 	"Quarantine-GameZone-441/servers/gateway/sessions"
-	"encoding/json"
 
-	"errors"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
-	"sync/atomic"
 	"time"
 
 	"github.com/go-redis/redis"
 	"github.com/streadway/amqp"
 )
-
-// https://docs.google.com/document/d/1sVaCIqW1SOicX7KDhEPr6TF_-ADWCGFz4I0KJB0Vbtw/edit
-// Director is a wrapper for a request handler
-type Director func(r *http.Request)
-
-// CustomDirector returns a Director
-// It balances requests between target URLS using round-robin
-// and adds X-user header if the request is authenticated
-func CustomDirector(targets []*url.URL, ctx *handlers.HandlerContext) Director {
-	var counter int32
-	counter = 0
-
-	return func(r *http.Request) {
-		targ := targets[int(counter)%len(targets)] // round-robin load balancer
-		atomic.AddInt32(&counter, 1)               // ensures counter isn't overwritten by parallel request
-
-		r.Header.Add("X-Forwarded-Host", r.Host)
-		r.Host = targ.Host
-		r.URL.Host = targ.Host
-		r.URL.Scheme = targ.Scheme
-
-		xuser, err := getXUser(r, ctx)
-		// add X-user header if we could get the sessionState user
-		if err == nil {
-			r.Header.Set("X-user", xuser)
-		} else {
-			log.Printf("no auth: %v\n", err)
-		}
-	}
-}
-
-// getXUser returns a string-encoded json object
-// containing the auth user in a request
-//  {
-//		nickname:  str,
-//		sessionID: str
-//  }
-func getXUser(r *http.Request, ctx *handlers.HandlerContext) (string, error) {
-
-	// check for incoming requests with x-user header
-	if len(r.Header.Get("X-user")) > 0 {
-		log.Println("removing x-user from client request")
-		r.Header.Del("X-user")
-	}
-	sessState := handlers.SessionState{}
-	sessID, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, &sessState)
-	if err != nil {
-		log.Printf("Error getting session state from request: %v\n", err)
-		return "INVALID", errors.New("Invalid session")
-	}
-
-	xUser := struct {
-		Nickname  string `json:"nickname"`
-		SessionID string `json:"sessionID"`
-	}{
-		sessState.Nickname,
-		sessID.String(),
-	}
-
-	xUserjson, err := json.Marshal(xUser)
-	if err != nil {
-		return "INVALID", errors.New("Invalid session")
-	}
-	return string(xUserjson), nil
-}
 
 //main is the main entry point for the server
 func main() {
