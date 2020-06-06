@@ -1,8 +1,10 @@
 # Project: Quarantine Game-Zone
-Updated Spec: https://docs.google.com/document/d/1bTPSGdqWB-4usx5t92q-fA1jr879KetxZ58KjcKz6d4/edit?usp=sharing
 
 Group Members: Jill, Vivian, Rafael, & Amit
 
+## Hosted Project
+- [Quarantine-Gamezone](https://rafibayer.me)
+- [API](https://api.rafibayer.me)
 
 ## Project description
 Quarantine Game-Zone is an application that allows you to play games with others online via a web browser. Players will be able to select a game from a game lobby and add their friend(s) to play!
@@ -166,17 +168,26 @@ move: {
 }
 ```
 
-Use cases and priority:  
+## Use cases and priority:  
 
-![Use cases](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/use.JPG)
+| Priority | User        | Description                               |
+|----------|-------------|-------------------------------------------|
+| P0       | As a player | I want to be able to create a nickname    |
+| P0       | As a player | I want to be able to make a new game      |
+| P0       | As a player | I want to be able to join a game          |
+| P0       | As a player | I want to be able to see games I can join |
+| P0       | As a player | I want to be able to play a game          |
+| P1       | As a player | I want to exit a game lobby               |
+| P1       | As a player | I want to exit a game after completion    |
+| P1       | As a player | I want to see the result of the game      |
+| P1       | As a player | I want to select different types of games |
+| P2       | As a player | I want to chat with players in the lobby  |
 
 
-Infrastructure diagram
+## Infrastructure diagram
 
-https://app.lucidchart.com/invitations/accept/ffb7c05e-ab8e-4cce-aa82-9e2046c505b6
 
-![infrastructure](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/Infrastructure%20Diagram.jpeg)
-
+![Infrastructure](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/Infrastructure%20Diagram%20-%20Final.png)
 
 
 
