@@ -11,7 +11,8 @@ ssh -i ~/.ssh/aws ec2-user@rafibayer.me << EOF
 
     docker run  \
     -d \
-    -p 80:80 \
+    -p 443:443 -p 80:80 \
+    -v /etc/letsencrypt/:/etc/letsencrypt/:ro \
     --name gamezone_client \
     $DOCKERUSER/gamezone_client
 

@@ -3,7 +3,7 @@
 
 let config = {};
 config.Endpoints = {
-	nicknames: "http://gamezone_gateway:80/v1/sessions/mine"
+	nicknames: "https://api.rafibayer.me/v1/sessions/mine"
 };
 
 module.exports = { config };

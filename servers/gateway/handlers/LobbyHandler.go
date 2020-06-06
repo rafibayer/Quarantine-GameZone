@@ -97,6 +97,7 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 	var gameLobbyStates map[string]string
 	res, err := gamesessions.GetAllSessions(ctx.SigningKey, ctx.GameSessionStore, gameLobbyStates)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		return
 	}

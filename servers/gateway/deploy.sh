@@ -1,15 +1,9 @@
 export DOCKERUSER=rbayer
 
 export REDISADDR=gamezone_redis:6379
-export TLSKEY=LOCALDEPLOY
-export TSLCERT=LOCALDEPLOY
 export SESSIONKEY=mysesskeyhehe
 
-echo "OUTDATED: SERVERS CONFIGURED FOR HTTPS"
-echo "exiting..."
-exit
-
-echo "DEPLOYING LIVE ON HTTP"
+echo "DEPLOYING LIVE ON **HTTPS**"
 
 # gateway
 ./build.sh
@@ -78,12 +72,14 @@ ssh -i ~/.ssh/aws ec2-user@api.rafibayer.me << EOF
     $DOCKERUSER/gamezone_trivia
 
     # gateway
-    docker run -d -p 80:80 \
-    -e ADDR=:80 \
+    docker run -d -p 443:443 \
+    -e ADDR=:443 \
     -e REDISADDR=gamezone_redis:6379 \
-    -e TLSKEY=$TLSKEY \
-    -e TLSCERT=$TLSCERT \
-    -e SESSIONKEY=$SESSIONKEY \
+    -e TLSKEY=/etc/letsencrypt/live/api.rafibayer.me/privkey.pem \
+    -e TLSCERT=/etc/letsencrypt/live/api.rafibayer.me/fullchain.pem \
+    -e SESSIONKEY=myverysecuresessionkey \
+    -v /etc/letsencrypt/:/etc/letsencrypt/:ro \
+    -e PROD=1 \
     --name gamezone_gateway \
     --network customNet \
     $DOCKERUSER/gamezone_gateway

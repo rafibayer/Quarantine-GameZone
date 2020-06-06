@@ -70,7 +70,7 @@ Our target audience is anyone looking for a way to stay social by playing games,
 
 ## Models
 ### Gateway & Lobbies
-```py
+```
 # Stores a users session and chosen nickname
 sessionState: {  
 	starTime: time.Time
@@ -101,7 +101,7 @@ gamelobby: {
 }
 ```
 ### Tic-Tac-Toe
-```py
+```
 
 # Tic tac toe internal gamestate
 TicTacToe: {
@@ -130,7 +130,7 @@ TicTacToeResponse: {
 }
 ```
 ### Trivia
-```py
+```
 # Trivia Question
 questionType: {
     question:       string

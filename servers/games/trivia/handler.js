@@ -12,7 +12,7 @@ const getNicknames = async (players) => {
             },
         }
         try {
-            const resp = await axios.get("http://gamezone_gateway:80/v1/sessions/mine", options)
+            const resp = await axios.get("https://api.rafibayer.me/v1/sessions/mine", options)
             if (resp.data) {
                 player = {
                     sessID: p,
@@ -58,7 +58,6 @@ const postGameHandler = async (req, res, next, { GameState }) => {
 // it also makes sure to shuffle the answers for the active question
 const getSpecificGameHandler = async (req, res, next, { GameState }) => {
     GameState.findOne({ _id: req.params.gameid }).exec().then(gameState => {
-        var gameEnded = false;
         if (gameState == undefined) {
             return res.status(400).send("game wasn't found");
         }
@@ -70,15 +69,7 @@ const getSpecificGameHandler = async (req, res, next, { GameState }) => {
             if (gameState.counter == gameState.questionBank.length - 1) {
                 gameEnded = true;
             }
-            let responseGameState = {}
-            if (gameEnded) {
-                responseGameState = convertToResponseGamestate(gameState, "ended");
-            } else {
-                responseGameState = convertToResponseGamestate(gameState, "in-progress");
-            }
-            if (responseGameState) {
-                return res.status(200).json(responseGameState);
-            }
+            let responseGameState = convertToResponseGamestate(gameState);
         } else {
             return res.status(401).send("unauthorized access")
         }
@@ -89,8 +80,15 @@ const getSpecificGameHandler = async (req, res, next, { GameState }) => {
 
 //method converts the gamestate into a respone json for client,
 //  includes active question with no answer and non-sensitive player info
-const convertToResponseGamestate = (gameState, outcomeString) => {
-    let activeQuestion = gameState.questionBank[gameState.counter];
+const convertToResponseGamestate = (gameState) => {
+    let nextQuestion;
+    if (gameState.outcome == "ended") {
+        nextQuestion = {question: "game over", answers: ["game over"]};
+
+    } else {
+        nextQuestion = gameState.questionBank[gameState.counter];
+
+    }
     let playerResponseInfo = [];
     gameState.players.forEach(p => {
         let playerInfo = {
@@ -102,12 +100,9 @@ const convertToResponseGamestate = (gameState, outcomeString) => {
     })
     let responseGameState = {
         playerInfos: playerResponseInfo,
-        activeQuestion: {
-            question: activeQuestion.question,
-            answers: activeQuestion.answers,
-        },
+        activeQuestion: nextQuestion,
         questionNumber: gameState.counter,
-        outcome: outcomeString
+        outcome: gameState.outcome
     }
     return responseGameState;
 }
@@ -122,17 +117,16 @@ const shuffle = (array) => {
 //accepts a user answer and updates the gamestate accordingly with who answered
 // and user score. Question is incremented when all players have posted their answer
 const postSpecificGameHandler = async (req, res, next, { GameState }) => {
+    // get the gamestate
     GameState.findOne({_id: req.params.gameid}).exec().then(gameState => {
-        var gameEnded = false;
+
         if (gameState == undefined) {
             return res.status(500).send("the trivia game wasn't found");
         }
         if (!req.get("Authorization")) {
             return res.status(401).send("unauthorized access");
         }
-        if (gameState.counter == gameState.questionBank.length - 1) {
-            gameEnded = true;
-        }
+       
         let auth = req.get("Authorization").split(" ")[1];
         let currPlayer = gameState.players.filter(p => p.sessID == auth)[0];
         if (currPlayer) {
@@ -147,30 +141,30 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
             if (answerIndex < 0 || answerIndex > activeQuestion.answers.length) {
                 return res.status(400).send("answer must be a valid number represnting index of potential answer");
             }
-            if (gameEnded) {
-                gameState.save((err, updateGameState) => {
-                    if (err) {
-                        return res.status(500).send("unable to update game in mongo")
-                    }
-                    let response = convertToResponseGamestate(updateGameState, "ended");
-                    return res.status(201).json(response);
-                });
+            if (gamestate.outcome == "ended") {
+                return res.status(400).send("Unable to make move, game has already ended")
             } else {
+                // correct answer
                 if (activeQuestion.correctAnswer == activeQuestion.answers[answerIndex]) {
                         currPlayer.score++;
-                        currPlayer.alreadyAnswered = true;
-                    } else {
-                        currPlayer.alreadyAnswered = true; 
-                    }
+                    } 
+                    currPlayer.alreadyAnswered = true; 
+                    
+                    // advance to next question
                     if (gameState.players.every(player => player.alreadyAnswered)) {
                         gameState.counter++;
+                        if (gameState.counter == gameState.questionBank.length) {
+                            gameEnded = true;
+                            gameState.outcome = "ended"
+                        }
                         gameState.players.forEach(player => player.alreadyAnswered = false);
                     }
+
                     gameState.save((err, updateGameState) => {
                         if (err) {
                             return res.status(500).send("unable to update game in mongo")
                         }
-                        let response = convertToResponseGamestate(updateGameState, "in-progress");
+                        let response = convertToResponseGamestate(updateGameState);
                         return res.status(201).json(response);
                     });
             }
