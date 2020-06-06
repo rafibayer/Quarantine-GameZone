@@ -52,13 +52,16 @@ func (n *Notifier) RemoveConnection(id string) {
 //WriteToConnections writes to all connections
 func (n *Notifier) WriteToConnections(msgs <-chan amqp.Delivery) {
 	for msg := range msgs {
+		log.Print("goign into loop")
 		n.lock.Lock()
 		byteMsg := []byte(msg.Body)
 		for id, conn := range n.Connections {
 			if err := conn.WriteMessage(websocket.TextMessage, byteMsg); err != nil {
+				log.Print("error writing message prolly not a connection")
 				n.RemoveConnection(id)
 				conn.Close()
 			}
+			log.Print("wrote message")
 		}
 		msg.Ack(false)
 		n.lock.Unlock()
@@ -77,7 +80,7 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 
 	//auth check?
 
-	ss := SessionState{}
+	ss := &SessionState{}
 	id, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, ss)
 	if err != nil {
 		http.Error(w, "Failed to get state", 500)
@@ -93,7 +96,7 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 		for {
 			messageType, p, err := conn.ReadMessage()
 			if messageType == websocket.TextMessage || messageType == websocket.BinaryMessage {
-				ss := SessionState{}
+				ss := &SessionState{}
 				_, err := sessions.GetState(r, ctx.SigningKey, ctx.SessionStore, ss)
 				if err != nil {
 					http.Error(w, "Failed to get state", 500)
@@ -102,10 +105,10 @@ func (ctx *HandlerContext) WsHandler(w http.ResponseWriter, r *http.Request) {
 				msgStr := fmt.Sprintf("%s: %s", ss.Nickname, string(p))
 
 				err = ctx.Channel.Publish(
-					"",      //exchange
-					"queue", //key
-					false,   //mandatory
-					false,   //immediate
+					"",                //exchange
+					"gamezone_rabbit", //key
+					false,             //mandatory
+					false,             //immediate
 					amqp.Publishing{
 						ContentType: "text/plain",
 						Body:        []byte(msgStr),

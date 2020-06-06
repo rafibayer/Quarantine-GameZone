@@ -3,10 +3,18 @@ import React, {Component} from 'react';
 class ChatLobby extends Component {
   constructor(props) {
     super(props);
-    this.ws = new WebSocket("ws://localhost:3000/ws") //CHANGE URL
+    this.ws = new WebSocket("ws://localhost:80/ws?auth=" + localStorage.getItem("Authorization")) //CHANGE URL
+    this.ws.onmessage = (e) => this.handleWs(e)
     this.state = {
-      message: ""
+      message: "",
+      messages: []
     };
+  }
+
+  handleWs = (e) => {
+    const messages = [...this.state.messages]; // creates shallow copy so it doesnt modify state directly
+    messages.push(e.data);
+    this.setState({messages: messages})
   }
 
   handleChange = (e) => {
@@ -18,11 +26,10 @@ class ChatLobby extends Component {
     this.ws.send(this.state.message);
   }
 
-  //fix chat div
   render() {
     return(
       <div>
-        <div id="chat">{ this.ws.onmessage = (e) => { return <p>{e.data}</p> } }</div>
+        <div id="chat">{this.state.messages.map(message => <p>{message}</p>)}</div>
         <input type="text" id="chatInput" value={this.state.nickname} onChange={this.handleChange} />
         <button type="submit" id="chatButton" onClick={this.handleChat}>Chat</button>
       </div>

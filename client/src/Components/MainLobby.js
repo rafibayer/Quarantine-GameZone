@@ -49,7 +49,7 @@ class MainLobby extends Component {
                     <ExitLobby setAuthToken={this.props.setAuthToken} setPlayer={this.props.setPlayer} setGameLobbyID={this.setGameLobbyID}></ExitLobby>
                     <CreateGameLobby setGameLobby={this.setGameLobby}></CreateGameLobby>
                     <JoinGameLobby setGameLobby={this.setGameLobby}></JoinGameLobby>
-                    <ChatLobby></ChatLobby>
+                    <ChatLobby setAuthToken={this.props.setAuthToken}></ChatLobby>
                 </div>
                 }
             </div>
