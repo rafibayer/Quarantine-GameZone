@@ -24,14 +24,15 @@ class ChatLobby extends Component {
   handleChat = (e) => {
     e.preventDefault();
     this.ws.send(this.state.message);
+    this.setState({message: ""});
   }
 
   render() {
     return(
       <div>
-        <div id="chat">{this.state.messages.map(message => <p>{message}</p>)}</div>
-        <input type="text" id="chatInput" value={this.state.nickname} onChange={this.handleChange} />
+        <input type="text" id="chatInput" value={this.state.message} onChange={this.handleChange} />
         <button type="submit" id="chatButton" onClick={this.handleChat}>Chat</button>
+        <div id="chat">{this.state.messages.map(message => <p>{message}</p>)}</div>
       </div>
     );
   }
