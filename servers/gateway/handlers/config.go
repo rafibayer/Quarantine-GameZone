@@ -11,5 +11,5 @@ var Endpoints = map[string]string{
 // of player capacities for each game supported
 var GameCapacity = map[string]int{
 	"tictactoe": 2,
-	"trivia":    2,
+	"trivia":    4,
 }
