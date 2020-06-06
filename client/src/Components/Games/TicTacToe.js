@@ -16,10 +16,6 @@ class TicTacToe extends Component {
         this.timer = setInterval(() => this.getState(), 2000);
     }
 
-    componentWillMount() {
-        console.log("game tictactoe polling has begun");
-    }
-
     componentWillUnmount() {
         clearInterval(this.timer);
     }
@@ -37,7 +33,7 @@ class TicTacToe extends Component {
 
     // get current game state
     getState = async () => {
-        const response = await fetch(api.base + api.handlers.game + this.props.gameID, {
+        const response = await fetch(api.testbase + api.handlers.game + this.props.gameID, {
             headers: new Headers({
                 "Authorization": localStorage.getItem("Authorization")
             })
@@ -57,7 +53,7 @@ class TicTacToe extends Component {
         e.preventDefault();
         var move = JSON.parse(e.target.value);
         const sendData = {row: move.rowPos, col: move.colPos};
-        const response = await fetch(api.base + api.handlers.game + this.props.gameID, {
+        const response = await fetch(api.testbase + api.handlers.game + this.props.gameID, {
             method: "POST",
             body: JSON.stringify(sendData),
             headers: new Headers({
@@ -106,7 +102,13 @@ class TicTacToe extends Component {
         } else {
             let displayBoard = [];
             let currentBoard = gameState.Board;
-
+            let playerBoard = "X: " + gameState.xname + " O: " + gameState.oname;
+            let turn = "";
+            if (gameState.xturn) {
+                turn = "It's " + gameState.xname + "'s turn!";
+            } else {
+                turn = "It's " + gameState.oname + "'s turn!";
+            }
             // read in current board state to tic toe toe board 
             for (var col = 0; col < 3; col++) {
                 for (var row = 0; row < 3; row++) {
@@ -132,6 +134,8 @@ class TicTacToe extends Component {
                 <div>
                     <Errors error={error} setError={this.setError} />
                     <h1>Tic-Tac-Toe</h1>
+                    {playerBoard} <br />
+                    {turn} <br />
                     {displayBoard}
                 </div>
             );

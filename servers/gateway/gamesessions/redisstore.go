@@ -94,61 +94,6 @@ func (rs *RedisStore) Delete(sid GameSessionID) error {
 	return nil
 }
 
-// GetAll returns all state data
-// func (rs *RedisStore) GetAll(GameLobbyStates []interface{}) ([]interface{}, error) {
-// 	//get all keys with prefix
-// 	keys, err := rs.Client.Keys("lid:*").Result()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	pipe := rs.Client.Pipeline()
-// 	results := make([]*redis.StringCmd, 0)
-
-// 	// get all values for those keys
-// 	for _, key := range keys {
-// 		log.Print("inside reddis store, printing each key")
-// 		log.Println(key)
-// 		str := []byte("[")
-// 		if key[0] != str[0] {
-// 			results = append(results, rs.Client.Get(key))
-// 		}
-// 	}
-
-// 	_, err = pipe.Exec()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	// close connection
-// 	pipe.Close()
-
-// 	log.Print("inside reddis store, printing results")
-// 	log.Println(results)
-
-// 	// Unmarshal and append to interface
-// 	for _, val := range results {
-// 		var lobby struct {
-// 			StartTime interface{}
-// 			GameLobby interface{}
-// 		}
-// 		log.Println("143")
-// 		values, err := val.Result()
-// 		if err == redis.Nil {
-// 			return nil, ErrStateNotFound
-// 		}
-// 		log.Println("150")
-// 		log.Println(values)
-// 		bytes := []byte(values)
-// 		err = json.Unmarshal(bytes, &lobby)
-// 		if err != nil {
-// 			log.Println(err.Error())
-// 			return nil, err
-// 		}
-// 		GameLobbyStates = append(GameLobbyStates, lobby.GameLobby)
-// 	}
-// 	return GameLobbyStates, nil
-// }
 func (rs *RedisStore) GetAll(GameLobbyStates map[string]string) (map[string]string, error) {
 	values, err := rs.Client.HGetAll(hash).Result()
 	if err != nil {
@@ -168,8 +113,6 @@ func (rs *RedisStore) GetAll(GameLobbyStates map[string]string) (map[string]stri
 		log.Println(err.Error())
 		return nil, err
 	}
-	log.Print("inside reddis store, printing values")
-	log.Println(values)
 	return values, nil
 }
 

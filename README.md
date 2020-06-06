@@ -69,44 +69,103 @@ Our target audience is anyone looking for a way to stay social by playing games,
         - 200 ok: Ends session
 
 ## Models
+### Gateway & Lobbies
 ```
-Player: {  
-	id: int,  
-	username: string,  
-	email: string,  
-	firstname: string,  
-	lastname: string,  
-	passwordHash: string  
-}  
+# Stores a users session and chosen nickname
+sessionState: {  
+	starTime: time.Time
+    nickname: string
+} 
 
-NewPlayer: {  
-	username: string,  
-	email: string,  
-        firstname: string,  
-	lastname: string,  
-	password: string,  
-	passwordConf: string  
-}  
+# Used by client to create new lobby
+newGameLobby: {
+    game_type: string
+}
 
-Credentials: {  
-	username:string,  
-	password: string  
-}  
+# internal representation of a gamelobby
+gamelobby: {
+    lobby_id: string
+    game_type: string
+    players: [sessionID]
+    capacity: int
+    gameID: gameSessionID
+}
 
-
-Game: {  
-	gameType: string,  
-	lobbyID: string,  
-	players: [playerID: int],  
-	gamestate: {  
-		// this is specific to each game,  
-		// will contain information for client to render   gamestate  
-		// such as the board in tictactoe or chess based on   gameType  
-		// and for server to handle game  
-		// logic such as whose turn it is  
-	    }  
-}  
+# game lobby representation for client
+gamelobby: {
+    lobby_id:   string
+    game_type:  string
+    players:    [string]
+    capacity:   int
+    game_ready: boolean
+}
 ```
+### Tic-Tac-Toe
+```
+
+# Tic tac toe internal gamestate
+TicTacToe: {
+	board:   [[int]] 
+	xturn:   bool     
+	xid:     string   
+	oid:     string   
+	xname:   string   
+	oname:   string   
+	outcome: string   
+}
+
+# Tic tac toe move from a client
+Move: {
+    row: int
+    col: int
+}
+
+# Tic tac toe response to client
+TicTacToeResponse: {
+	board:   [[int]] 
+	xturn:   bool     
+	xname:   string   
+	oname:   string   
+	outcome: string   
+}
+```
+### Trivia
+```
+# Trivia Question
+questionType: {
+    question:       string
+    answers:        [string]
+    correctAnswer:  string # internal only
+}
+
+# Player
+playerType: {
+    sessID:          string # internal only
+    nickname:        string
+    score:           int
+    alreadyAnswered: bool
+}
+
+# Internal Gamestate
+gameStateSchema : {
+    players:      [playerType]
+    counter:      int
+    questionBank: [questionType]
+}
+
+# Response Gamestate for client
+gameStateResponse : {
+    players:         [playerType]
+    questionNumer:   int
+    activeQuestion:  questionType
+}
+
+# Move from client
+move: {
+    move: int
+}
+```
+
 Use cases and priority:  
 
 ![Use cases](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/use.JPG)

@@ -5,7 +5,6 @@ import (
 	"Quarantine-GameZone-441/servers/gateway/sessions"
 	"errors"
 	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -29,7 +28,6 @@ func (ctx *HandlerContext) gameAndPlayerAuthentication(r *http.Request) (string,
 	if len(gameID) == 0 {
 		return unauthEndPoint, errors.New("game session doesn't exist")
 	}
-	log.Printf("gameID from game lobby %s", gameID)
 
 	playerExists := false
 	for _, player := range LobbySessionState.GameLobby.Players {

@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import gametypes from '../Constants/GameTypes.js'
 import api from '../Constants/Endpoints.js'
-import LeaveGameLobby from './LeaveGameLobby.js'
 import Errors from './Errors.js'
 
 // game imports
@@ -99,7 +98,6 @@ class GameLobby extends Component {
                         Current players: { stringListOfPlayers } <br />
                         Waiting for {capacity - players.length} more player(s)...
                     </p>
-                    <LeaveGameLobby removeGameLobby={this.props.removeGameLobby}></LeaveGameLobby>
                  </div>
                 }
             </div>

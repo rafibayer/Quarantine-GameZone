@@ -19,9 +19,6 @@ func activateGame(lobby *GameLobby, sessID sessions.SessionID) (map[string]inter
 		return nil, err
 	}
 
-	log.Println("lobby from activate game", &lobby)
-	log.Println("requestbody", requestBody)
-
 	// request, err := http.NewRequest("POST", Endpoints[lobby.GameType], bytes.NewBuffer(requestBody))
 	// if err != nil {
 	// 	return nil, err
@@ -32,8 +29,6 @@ func activateGame(lobby *GameLobby, sessID sessions.SessionID) (map[string]inter
 	resp, err := http.Post(Endpoints[lobby.GameType], "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		log.Println(err)
-		log.Println(Endpoints[lobby.GameType])
-		log.Println(lobby.GameType)
 		return nil, err
 	}
 
@@ -125,7 +120,6 @@ func (ctx *HandlerContext) SpecificLobbyHandlerPost(w http.ResponseWriter, r *ht
 	//Responds back to the user with the updated user
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	log.Printf("Returning lobby to client: %+v", *gameLobby)
 	encoder := json.NewEncoder(w)
 	err = encoder.Encode(ResponseGameLobby)
 	if err != nil {

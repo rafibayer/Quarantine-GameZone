@@ -16,7 +16,7 @@ const InProgress = "In-Progress"
 
 // TicTacToe struct holds gamestate information for a game of tic tac toe
 type TicTacToe struct {
-	Board   [3][3]int `json:"Board"`
+	Board   [3][3]int `json:"board"`
 	Xturn   bool      `json:"xturn"`
 	Xid     string    `json:"xid"`
 	Oid     string    `json:"oid"`

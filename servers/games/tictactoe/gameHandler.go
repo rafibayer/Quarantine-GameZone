@@ -61,7 +61,6 @@ func PrepareGameStateResponse(game *TicTacToe) (*TicTacToeResponse, error) {
 		Outcome: game.Outcome,
 	}
 
-	log.Printf("Made game response: %+v", result)
 	return result, nil
 }
 
@@ -124,6 +123,11 @@ func (gameStore *RedisStore) GameHandler(w http.ResponseWriter, r *http.Request)
 	gameID := base64.URLEncoding.EncodeToString(randBytes)
 
 	gamestate := NewTicTacToe(lobby.Players[0], lobby.Players[1])
+	if gamestate == nil {
+		log.Println("Failed to get nicknames")
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
 	log.Printf("made game: %+v", gamestate)
 
 	gameStore.Save(GameID(gameID), gamestate)
