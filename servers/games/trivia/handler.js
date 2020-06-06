@@ -66,10 +66,8 @@ const getSpecificGameHandler = async (req, res, next, { GameState }) => {
         }
         let auth = req.get("Authorization").split(" ")[1]
         if (gameState.players.some(p => p.sessID == auth)) {
-            if (gameState.counter == gameState.questionBank.length - 1) {
-                gameEnded = true;
-            }
             let responseGameState = convertToResponseGamestate(gameState);
+            return res.status(200).json(responseGameState);
         } else {
             return res.status(401).send("unauthorized access")
         }
@@ -84,10 +82,8 @@ const convertToResponseGamestate = (gameState) => {
     let nextQuestion;
     if (gameState.outcome == "ended") {
         nextQuestion = {question: "game over", answers: ["game over"]};
-
     } else {
         nextQuestion = gameState.questionBank[gameState.counter];
-
     }
     let playerResponseInfo = [];
     gameState.players.forEach(p => {
@@ -100,7 +96,10 @@ const convertToResponseGamestate = (gameState) => {
     })
     let responseGameState = {
         playerInfos: playerResponseInfo,
-        activeQuestion: nextQuestion,
+        activeQuestion: {
+            question: nextQuestion.question,
+            answers: nextQuestion.answers
+        },
         questionNumber: gameState.counter,
         outcome: gameState.outcome
     }
@@ -141,33 +140,33 @@ const postSpecificGameHandler = async (req, res, next, { GameState }) => {
             if (answerIndex < 0 || answerIndex > activeQuestion.answers.length) {
                 return res.status(400).send("answer must be a valid number represnting index of potential answer");
             }
-            if (gamestate.outcome == "ended") {
+            if (gameState.outcome == "ended") {
                 return res.status(400).send("Unable to make move, game has already ended")
-            } else {
-                // correct answer
-                if (activeQuestion.correctAnswer == activeQuestion.answers[answerIndex]) {
-                        currPlayer.score++;
-                    } 
-                    currPlayer.alreadyAnswered = true; 
-                    
-                    // advance to next question
-                    if (gameState.players.every(player => player.alreadyAnswered)) {
-                        gameState.counter++;
-                        if (gameState.counter == gameState.questionBank.length) {
-                            gameEnded = true;
-                            gameState.outcome = "ended"
-                        }
-                        gameState.players.forEach(player => player.alreadyAnswered = false);
-                    }
-
-                    gameState.save((err, updateGameState) => {
-                        if (err) {
-                            return res.status(500).send("unable to update game in mongo")
-                        }
-                        let response = convertToResponseGamestate(updateGameState);
-                        return res.status(201).json(response);
-                    });
             }
+            // correct
+            if (activeQuestion.correctAnswer == activeQuestion.answers[answerIndex]) {
+                    currPlayer.score++;
+            } 
+            currPlayer.alreadyAnswered = true; 
+            
+            // advance to next question
+            if (gameState.players.every(player => player.alreadyAnswered)) {
+                gameState.counter++;
+                if (gameState.counter == gameState.questionBank.length) {
+                    gameState.outcome = "ended"
+                }
+                gameState.players.forEach(player => player.alreadyAnswered = false);
+            }
+
+            gameState.save((err, updateGameState) => {
+                if (err) {
+                    return res.status(500).send("unable to update game in mongo")
+                }
+                let response = convertToResponseGamestate(updateGameState);
+                //console.log("sending gamestate: " + response);
+                return res.status(201).json(response);
+            });
+            
         } else {
             return res.status(401).send("unauthorized access")
         }

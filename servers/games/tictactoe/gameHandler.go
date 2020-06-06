@@ -61,7 +61,6 @@ func PrepareGameStateResponse(game *TicTacToe) (*TicTacToeResponse, error) {
 		Outcome: game.Outcome,
 	}
 
-	log.Printf("Made game response: %+v", result)
 	return result, nil
 }
 

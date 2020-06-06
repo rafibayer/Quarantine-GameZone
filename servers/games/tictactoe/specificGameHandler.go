@@ -43,8 +43,6 @@ func (gameStore *RedisStore) SpecificGameHandlerGet(w http.ResponseWriter, r *ht
 // SpecificGameHandlerPost is used to send moves to a specific game
 func (gameStore *RedisStore) SpecificGameHandlerPost(w http.ResponseWriter, r *http.Request) {
 
-	log.Println("request reached: SpecificGameHandlerPost")
-	log.Printf("Headers: %+v", r.Header)
 	// Content JSON
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "415: Request body must be application/json", http.StatusUnsupportedMediaType)
