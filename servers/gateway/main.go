@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/streadway/amqp"
 )
 
 // https://docs.google.com/document/d/1sVaCIqW1SOicX7KDhEPr6TF_-ADWCGFz4I0KJB0Vbtw/edit
@@ -120,6 +121,15 @@ func main() {
 		log.Fatal("No redis addr found")
 	}
 
+	rabbitAddr := os.Getenv("RABBITADDR")
+	if len(redisaddr) == 0 {
+		log.Fatal("No rabbitmq addr found")
+	}
+	rabbitName := os.Getenv("RABBITNAME")
+	if len(redisaddr) == 0 {
+		log.Fatal("No rabbitmq name found")
+	}
+
 	// SessionStore connection
 	client := redis.NewClient(&redis.Options{
 		Addr: redisaddr,
@@ -133,7 +143,42 @@ func main() {
 	sessionStore := sessions.NewRedisStore(client, time.Hour)
 	gameSessionStore := gamesessions.NewRedisStore(client, time.Hour)
 
-	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore)
+	// RabbitMQ connection
+	conn, err := amqp.Dial(rabbitAddr)
+	if err != nil {
+		log.Fatalf("Error connecting to RabbitMQ: %s", err)
+	}
+	defer conn.Close()
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Error opening a channel: %s", err)
+	}
+	defer ch.Close()
+	q, err := ch.QueueDeclare(
+		rabbitName, //name
+		true,       //durable
+		false,      //autoDelete
+		false,      //exclusive
+		false,      //noWait
+		nil)        //args
+	if err != nil {
+		log.Fatalf("Error declaring a queue: %s", err)
+	}
+	msgs, err := ch.Consume(
+		q.Name, //queue
+		"",     //consumer
+		false,  //autoAck
+		false,  //exclusive
+		false,  //noLocal
+		false,  //noWait
+		nil)    //args
+	if err != nil {
+		log.Fatalf("Error when setting up consumer: %s", err)
+	}
+
+	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore, ch)
+
+	go handlerContext.Notifier.WriteToConnections(msgs)
 
 	// summaryProxy := &httputil.ReverseProxy{Director: CustomDirector(summaryAddresses, handlerContext)}
 	// messageProxy := &httputil.ReverseProxy{Director: CustomDirector(messageAddresses, handlerContext)}

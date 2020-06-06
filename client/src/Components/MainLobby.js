@@ -3,6 +3,7 @@ import CreateGameLobby from './CreateGameLobby.js'
 import GameLobby from './GameLobby.js'
 import JoinGameLobby from './JoinGameLobby.js'
 import ExitLobby from './ExitLobby.js'
+import ChatLobby from './ChatLobby.js'
 
 class MainLobby extends Component {
     constructor(props) {
@@ -48,6 +49,7 @@ class MainLobby extends Component {
                     <ExitLobby setAuthToken={this.props.setAuthToken} setPlayer={this.props.setPlayer} setGameLobbyID={this.setGameLobbyID}></ExitLobby>
                     <CreateGameLobby setGameLobby={this.setGameLobby}></CreateGameLobby>
                     <JoinGameLobby setGameLobby={this.setGameLobby}></JoinGameLobby>
+                    <ChatLobby setAuthToken={this.props.setAuthToken}></ChatLobby>
                 </div>
                 }
             </div>
