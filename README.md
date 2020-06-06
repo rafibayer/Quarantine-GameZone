@@ -184,8 +184,11 @@ move: {
 | P2       | As a player | I want to chat with players in the lobby  |
 
 
-## Infrastructure diagram
 
+## Original Infrastructure diagram
+![Infrastructure](old-diagram.jpg)
+
+## Current Infrastructure diagram
 
 ![Infrastructure](https://github.com/rafibayer/Quarantine-GameZone-441/blob/master/Infrastructure%20Diagram%20-%20Final.png)
 
