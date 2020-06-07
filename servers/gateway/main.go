@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/streadway/amqp"
 )
 
 //main is the main entry point for the server
@@ -51,14 +52,14 @@ func main() {
 		log.Fatal("No redis addr found")
 	}
 
-	// rabbitAddr := os.Getenv("RABBITADDR")
-	// if len(redisaddr) == 0 {
-	// 	log.Fatal("No rabbitmq addr found")
-	// }
-	// rabbitName := os.Getenv("RABBITNAME")
-	// if len(redisaddr) == 0 {
-	// 	log.Fatal("No rabbitmq name found")
-	// }
+	rabbitAddr := os.Getenv("RABBITADDR")
+	if len(redisaddr) == 0 {
+		log.Fatal("No rabbitmq addr found")
+	}
+	rabbitName := os.Getenv("RABBITNAME")
+	if len(redisaddr) == 0 {
+		log.Fatal("No rabbitmq name found")
+	}
 
 	// SessionStore connection
 	client := redis.NewClient(&redis.Options{
@@ -74,41 +75,41 @@ func main() {
 	gameSessionStore := gamesessions.NewRedisStore(client, time.Hour)
 
 	// RabbitMQ connection
-	// conn, err := amqp.Dial(rabbitAddr)
-	// if err != nil {
-	// 	log.Fatalf("Error connecting to RabbitMQ: %s", err)
-	// }
-	// defer conn.Close()
-	// ch, err := conn.Channel()
-	// if err != nil {
-	// 	log.Fatalf("Error opening a channel: %s", err)
-	// }
-	// defer ch.Close()
-	// q, err := ch.QueueDeclare(
-	// 	rabbitName, //name
-	// 	true,       //durable
-	// 	false,      //autoDelete
-	// 	false,      //exclusive
-	// 	false,      //noWait
-	// 	nil)        //args
-	// if err != nil {
-	// 	log.Fatalf("Error declaring a queue: %s", err)
-	// }
-	// msgs, err := ch.Consume(
-	// 	q.Name, //queue
-	// 	"",     //consumer
-	// 	false,  //autoAck
-	// 	false,  //exclusive
-	// 	false,  //noLocal
-	// 	false,  //noWait
-	// 	nil)    //args
-	// if err != nil {
-	// 	log.Fatalf("Error when setting up consumer: %s", err)
-	// }
+	conn, err := amqp.Dial(rabbitAddr)
+	if err != nil {
+		log.Fatalf("Error connecting to RabbitMQ: %s", err)
+	}
+	defer conn.Close()
+	ch, err := conn.Channel()
+	if err != nil {
+		log.Fatalf("Error opening a channel: %s", err)
+	}
+	defer ch.Close()
+	q, err := ch.QueueDeclare(
+		rabbitName, //name
+		true,       //durable
+		false,      //autoDelete
+		false,      //exclusive
+		false,      //noWait
+		nil)        //args
+	if err != nil {
+		log.Fatalf("Error declaring a queue: %s", err)
+	}
+	msgs, err := ch.Consume(
+		q.Name, //queue
+		"",     //consumer
+		false,  //autoAck
+		false,  //exclusive
+		false,  //noLocal
+		false,  //noWait
+		nil)    //args
+	if err != nil {
+		log.Fatalf("Error when setting up consumer: %s", err)
+	}
 
-	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore)
+	handlerContext := handlers.NewHandlerContext(sessionkey, sessionStore, gameSessionStore, ch)
 
-	//go handlerContext.Notifier.WriteToConnections(msgs)
+	go handlerContext.Notifier.WriteToConnections(msgs)
 
 	// summaryProxy := &httputil.ReverseProxy{Director: CustomDirector(summaryAddresses, handlerContext)}
 	// messageProxy := &httputil.ReverseProxy{Director: CustomDirector(messageAddresses, handlerContext)}
@@ -118,7 +119,7 @@ func main() {
 	mux.HandleFunc("/v1/sessions", handlerContext.SessionHandler)
 	mux.HandleFunc("/v1/sessions/", handlerContext.SpecificSessionHandler)
 
-	//mux.HandleFunc("/ws", handlerContext.WsHandler)
+	mux.HandleFunc("/ws", handlerContext.WsHandler)
 	mux.HandleFunc("/v1/gamelobby", handlerContext.LobbyHandler)
 	mux.HandleFunc("/v1/gamelobby/", handlerContext.SpecificLobbyHandler)
 	mux.HandleFunc("/v1/games/", handlerContext.SpecificGameHandler)

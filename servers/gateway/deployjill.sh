@@ -28,7 +28,7 @@ docker run -d \
   -e REDISADDR=gamezone_redis:6379 \
   --name gamezone_tictactoe \
   --network customNet \
-  amitgal17/gamezone_tictactoe
+  janguy/gamezone_tictactoe
 
 docker run -d \
   --name gamezone_rabbit \
@@ -48,7 +48,7 @@ docker run -d -p 80:80 \
   --name gamezone_gateway \
   --network customNet \
   --restart unless-stopped \
-  amitgal17/gamezone_gateway
+  janguy/gamezone_gateway
 
 docker logs gamezone_gateway
 
