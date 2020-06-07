@@ -12,63 +12,101 @@ Quarantine Game-Zone is an application that allows you to play games with others
 Our target audience is anyone looking for a way to stay social by playing games, especially during quarantine. There are many other similar services, such as Jackbox, Drawful, and more, but we want to offer a free and easy-to-use alternative. As developers, we want to create an app that we could see ourselves using. As students experiencing this unprecedented online quarter, we think it’s more important than ever to stay connected, and games are a fantastic way to do that.
 
 ## Endpoints
-### Games lobby
-- /v1/games/
-    - GET; Admin purposes, see all currently running games
-        - 200: Gets all games sessions that are currently happening, returns map of:
-            - lobbyID: gameType
-        - 500: Internal server error
-- /v1/games/tictactoe 
-    - POST
-        - 201 created: Creates a game state on the server, sends you the initial state of the game as JSON
-        - 500: Internal server error
-- /v1/games/tictactoe/{lobby id}
-    - GET
-        - 200 ok: Returns the current state of the game
-        - 401 unauthorized: Could not verify player, or they are not in the game
-        - 404 not found: The game wasn’t found
-        - 415: Unsupported media type
-        - 500: Internal server error
-    - POST
-        - 201 created: Applies the move to the game, returns the updated game state as JSON
-        - 400 bad request: An illegal move is given
-        - 401 unauthorized: Could not verify player, or they are not in the game 
-        - 404 not found: The game wasn’t found
-        - 415: Unsupported media type
-        - 500: Internal server error
-### Players
-- /v1/players
-    - POST
-        - 201 created: Create a new player
-- Specific player
-- /v1/players/{player id OR me}
-    - PATCH
-        - 200 ok:  update player (first name, last name)
-        - 403 forbidden: not authenticated to make changes to this player profile
-        - 404 not found: player not found
-        - 415: Unsupported media type
-    - GET
-        - 200 ok: get player info
-        - 403 forbidden: not authenticated to get player profile
-        - 404 not found: player not found
-        - 415: Unsupported media type
-    - DELETE
-        - 200 ok:
-        - 403 forbidden: not authenticated to delete this player
-        - 404 not found: player not found
-        - 415: Unsupported media type
-### Sessions
+## Endpoints
+
+## Sessions
+
 - /v1/sessions
-    - POST
-        - 201 created: Created a new session
-        - 401 unauthorized: Bad credentials
-        - 415: unsupported media type
-        - 500: Internal server error
-- Specific session
-- /v1/sessions/{session id or mine}
-    - DELETE
-        - 403 forbidden: not mine
-        - 200 ok: Ends session
+  - POST
+    - 201: created a new player session
+    - 403: invalid nickname forbidden
+    - 415: unsupported media
+    - 500: internal server error
+
+- /v1/sessions/
+  - GET
+    - 400: bad request
+    - 403: forbidden request if not user's session
+  - DELETE
+    - 400: bad request
+    - 403: forbidden request if not user's session
+
+## Game Lobbies
+
+- /v1/gamelobby
+  - POST
+    - 401: created a new game lobby session
+    - 400: bad request for unsupported game type
+    - 401: unauthorized to create a new lobby session, must have player session
+    - 415: unsupported media
+    - 500: internal server error
+  - GET
+    - 200: ok to get game lobbies
+    - 401: unauthorized to get game lobbies, must have player session
+    - 500: internal server error
+
+- /v1/gamelobby/{lobby_id}
+  - POST
+    - 201: added a new player to game lobby
+    - 400: bad request if player is already in a game session
+    - 401: unauthorized game session or must have player session
+    - 403: forbidden request to add player if game is at max capacity
+    - 500: internal server error
+  - GET
+    - 200: status ok, get game lobby state
+    - 401: unauthorized to get a game lobby state, must be a player of the game lobby
+    - 500: internal server error
+
+## Games
+
+- /v1/games/{game_id}
+  - POST
+    - 401: unauthorized player for the requested game session
+    - 500: internal server error
+  - GET
+    - 401: unauthorized player for the requested game session
+    - 500 internal server error
+
+* THE FOLLOWING ENDPOINTS ARE FOR INTERNAL USE AND ARE NOT USED BY CLIENT
+* THEY ARE REACHED MAKING REQUESTS TO /v1/games/
+
+- /v1/tictactoe
+  - POST
+    - 201: tic-tac-toe game created from tic-tac-toe game lobby
+    - 400: bad request, invalid game lobby state, invalid game type or invalid number of players
+    - 415: unsupported media
+    - 500: internal server error
+
+- /v1/tictactoe/{game_id}
+  - POST
+    - 200: status ok, tic-tac-toe move made
+    - 400: bad move request
+    - 401: unauthorized player
+    - 403: forbidden move request
+    - 404: game state not found
+    - 415: unsupported media
+    - 500: internal server error
+  - GET
+    - 200: status ok, get tic-tac-toe game state
+    - 404: game state not found
+    - 500: internal server error
+
+- /v1/trivia
+  - POST
+    - 201: trivia game created from trivia game lobby
+    - 500: internal server error
+
+- /v1/trivia/{game_id}
+  - POST
+    - 201: trivia answer made
+    - 400: bad request, player already answered trivia question or invalid answer data
+    - 401: unauthorized player
+    - 500: internal server error
+  - GET
+    - 200: status ok, get trivia game state
+    - 400: bad request
+    - 401: unauthorized player
+    - 404: game state not found
 
 ## Models
 ### Gateway & Lobbies
