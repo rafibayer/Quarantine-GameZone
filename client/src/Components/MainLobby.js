@@ -17,7 +17,16 @@ class MainLobby extends Component {
         this.setGameLobby = this.setGameLobby.bind(this);
         this.removeGameLobby = this.removeGameLobby.bind(this);
     }
-    
+
+    // componentDidMount() {
+    //     window.addEventListener("beforeunload", (ev) => 
+    //     {  
+    //         ev.preventDefault();
+    //         this.removeGameLobby();
+    //         return;
+    //     });      
+    // }
+          
     // set error message
     setError = (error) => {
         this.setState({ error })

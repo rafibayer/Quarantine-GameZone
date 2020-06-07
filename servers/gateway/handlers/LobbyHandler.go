@@ -108,12 +108,14 @@ func (ctx *HandlerContext) LobbyHandlerGet(w http.ResponseWriter, r *http.Reques
 			http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
 		}
 		err = json.Unmarshal(res, &gameLobby)
-		lobby, err := ctx.convertToResponseLobbyForClient(gameLobby)
-		if err != nil {
-			http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
-			return
+		if len(gameLobby.GameID) == 0 {
+			lobby, err := ctx.convertToResponseLobbyForClient(gameLobby)
+			if err != nil {
+				http.Error(w, "Error retrieving game lobbies", http.StatusInternalServerError)
+				return
+			}
+			resultLobbies = append(resultLobbies, *lobby)
 		}
-		resultLobbies = append(resultLobbies, *lobby)
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
