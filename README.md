@@ -226,6 +226,7 @@ move: {
 | P1       | As a player | I want to see the result of the game      |
 | P1       | As a player | I want to select different types of games |
 | P2       | As a player | I want to chat with players in the lobby  |
+| P2       | As a player | I want to leave lobby before a game starts|
 
 
 
