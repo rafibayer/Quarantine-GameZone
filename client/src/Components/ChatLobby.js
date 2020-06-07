@@ -4,8 +4,7 @@ import '../Styles/ChatLobby.css';
 class ChatLobby extends Component {
   constructor(props) {
     super(props);
-    this.ws = new WebSocket("ws://localhost:80/ws?auth=" + localStorage.getItem("Authorization"))
-    // this.ws = new WebSocket("wss://api.rafibayer.me:443/ws?auth=" + localStorage.getItem("Authorization"))
+    this.ws = new WebSocket("wss://api.rafibayer.me:443/ws?auth=" + localStorage.getItem("Authorization"))
     this.ws.onmessage = (e) => this.handleWs(e)
     this.state = {
       message: "",

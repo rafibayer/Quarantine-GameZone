@@ -1,5 +1,5 @@
 export default {
-    base: "http://localhost",
+    base: "https://api.rafibayer.me",
     testbase: "http://localhost",
     handlers: {
         players: "/v1/sessions",
