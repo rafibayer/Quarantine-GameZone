@@ -14,7 +14,7 @@ Our target audience is anyone looking for a way to stay social by playing games,
 ## Endpoints
 ## Endpoints
 
-## Sessions
+### Sessions
 
 - /v1/sessions
   - POST
@@ -31,7 +31,7 @@ Our target audience is anyone looking for a way to stay social by playing games,
     - 400: bad request
     - 403: forbidden request if not user's session
 
-## Game Lobbies
+### Game Lobbies
 
 - /v1/gamelobby
   - POST
@@ -57,7 +57,7 @@ Our target audience is anyone looking for a way to stay social by playing games,
     - 401: unauthorized to get a game lobby state, must be a player of the game lobby
     - 500: internal server error
 
-## Games
+### Games
 
 - /v1/games/{game_id}
   - POST
