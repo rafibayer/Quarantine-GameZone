@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/mitchellh/mapstructure"
 )
 
 //RedisStore represents a session.Store backed by redis.
@@ -44,7 +43,7 @@ func (rs *RedisStore) Save(sid GameSessionID, GameLobbyState interface{}) error 
 
 	// save the session id and state in the redis store
 	rs.Client.Set(sid.getRedisKey(), json, rs.SessionDuration)
-	rs.Client.HSet(hash, sid.getRedisKey(), json)
+	// rs.Client.HSet(hash, sid.getRedisKey(), json)
 	return nil
 }
 
@@ -94,26 +93,77 @@ func (rs *RedisStore) Delete(sid GameSessionID) error {
 	return nil
 }
 
-func (rs *RedisStore) GetAll(GameLobbyStates map[string]string) (map[string]string, error) {
-	values, err := rs.Client.HGetAll(hash).Result()
+// func (rs *RedisStore) GetAll(GameLobbyStates map[string]string) (map[string]string, error) {
+// 	values, err := rs.Client.HGetAll(hash).Result()
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return nil, err
+// 	}
+// 	//results := make([]*redis.StringCmd, 0)
+// 	//var lobby interface{}
+// 	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{TagName: "redis", Result: &GameLobbyStates, WeaklyTypedInput: true})
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return nil, err
+// 	}
+
+// 	err = decoder.Decode(values)
+// 	if err != nil {
+// 		log.Println(err.Error())
+// 		return nil, err
+// 	}
+// 	return values, nil
+// }
+
+//GetAll returns all state data
+func (rs *RedisStore) GetAll() ([]interface{}, error) {
+	//get all keys with prefix
+	gameLobbyStates := (make([]interface{}, 0))
+
+	keys, err := rs.Client.Keys("lid:*").Result()
 	if err != nil {
-		log.Println(err.Error())
-		return nil, err
-	}
-	//results := make([]*redis.StringCmd, 0)
-	//var lobby interface{}
-	decoder, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{TagName: "redis", Result: &GameLobbyStates, WeaklyTypedInput: true})
-	if err != nil {
-		log.Println(err.Error())
 		return nil, err
 	}
 
-	err = decoder.Decode(values)
+	pipe := rs.Client.Pipeline()
+	results := make([]*redis.StringCmd, 0)
+
+	// get all values for those keys
+	for _, key := range keys {
+		str := []byte("[")
+		if key[0] != str[0] {
+			results = append(results, rs.Client.Get(key))
+		}
+	}
+
+	log.Printf("results inside get all: %v", results)
+
+	_, err = pipe.Exec()
 	if err != nil {
-		log.Println(err.Error())
 		return nil, err
 	}
-	return values, nil
+
+	// close connection
+	pipe.Close()
+	// Unmarshal and append to interface
+	for _, val := range results {
+		var lobby struct {
+			StartTime interface{}
+			GameLobby interface{}
+		}
+		values, err := val.Result()
+		if err == redis.Nil {
+			return nil, ErrStateNotFound
+		}
+		bytes := []byte(values)
+		err = json.Unmarshal(bytes, &lobby)
+		if err != nil {
+			log.Println(err.Error())
+			return nil, err
+		}
+		gameLobbyStates = append(gameLobbyStates, lobby.GameLobby)
+	}
+	return gameLobbyStates, nil
 }
 
 //getRedisKey() returns the redis key to use for the SessionID

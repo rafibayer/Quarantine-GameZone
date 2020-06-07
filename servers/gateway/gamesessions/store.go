@@ -27,5 +27,6 @@ type Store interface {
 	Delete(gid GameSessionID) error
 
 	// GetAll returns all state data with a given prefix
-	GetAll(GameLobbyStates map[string]string) (map[string]string, error)
+	//GetAll(GameLobbyStates map[string]string) (map[string]string, error)
+	GetAll() ([]interface{}, error)
 }

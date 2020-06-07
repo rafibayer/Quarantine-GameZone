@@ -87,6 +87,9 @@ func (ctx *HandlerContext) SpecificLobbyHandler(w http.ResponseWriter, r *http.R
 	case http.MethodGet:
 		ctx.SpecificLobbyHandlerGet(w, r)
 		return
+	case http.MethodPatch:
+		ctx.SpecificLobbyHandlerPatch(w, r)
+		return
 	}
 
 	http.Error(w, "405: Method not allowed", http.StatusMethodNotAllowed)

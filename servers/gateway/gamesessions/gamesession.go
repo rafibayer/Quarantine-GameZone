@@ -74,7 +74,6 @@ func GetGameState(r *http.Request, signingKey string, store Store, SessionState 
 	// retrieve the associated state from the store
 	err = store.Get(gameSessID, SessionState)
 	if err != nil {
-
 		return InvalidGameSessionID, ErrStateNotFound
 	}
 	return gameSessID, nil
@@ -104,13 +103,12 @@ func EndGameSession(r *http.Request, signingKey string, store Store) (GameSessio
 }
 
 // GetAllSessions returns a slice of all public GameLobby
-func GetAllSessions(signingKey string, store Store, GameLobbyStates map[string]string) (map[string]string, error) {
+func GetAllSessions(signingKey string, store Store) ([]interface{}, error) {
 
-	res, err := store.GetAll(GameLobbyStates)
+	res, err := store.GetAll()
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
-
 	return res, nil
-
 }
