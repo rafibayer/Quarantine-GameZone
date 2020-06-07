@@ -4,6 +4,8 @@ import GameLobby from './GameLobby.js'
 import JoinGameLobby from './JoinGameLobby.js'
 import ExitLobby from './ExitLobby.js'
 import ChatLobby from './ChatLobby.js'
+import api from '../Constants/Endpoints.js'
+
 
 class MainLobby extends Component {
     constructor(props) {
@@ -30,7 +32,21 @@ class MainLobby extends Component {
     }
 
     // remove game lobby data in state 
-    removeGameLobby = () => {
+    removeGameLobby = async() => {
+        let game = localStorage.getItem("GameLobby");
+        game = JSON.parse(game);
+        var id = game.lobby_id;
+        const response = await fetch(api.base + api.handlers.gamelobby + id, {
+            method: "PATCH",
+            headers: new Headers({
+                "Authorization": localStorage.getItem("Authorization")
+            })
+        });
+        if (response.status >= 300) {
+            const error = await response.text();
+            this.setError(error);
+            return;
+        }
         this.setState({
             gameLobby: null
         });
