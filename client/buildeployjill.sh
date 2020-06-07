@@ -1,6 +1,6 @@
 npm run build
 
-docker build -t amitgal17/gamezone_client .
+docker build -t janguy/gamezone_client .
 
 docker rm -f gamezone_client
 
@@ -9,4 +9,4 @@ docker run  \
   -p 3000:80 \
   --network customNet \
   --name gamezone_client \
-  amitgal17/gamezone_client
+  janguy/gamezone_client

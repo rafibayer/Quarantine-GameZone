@@ -1,23 +1,21 @@
-html {
-    background-color: #f78888;
-}
-
 body {
-    padding-top: 10%;
-    height: 100vh;
     font-family: Lato, sans-serif;
     text-align: center;
-    margin-left: 25%;
-    margin-right: 25%;
     color: white;
-    background-color: black;
+    background-color: #0C3C5D;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
 }
 
-button, input {
+* {
+    box-sizing: border-box;
+}
+
+/* button, input {
     border-radius: 5%;
     padding: 1%;
-    margin-bottom: 5%;
-}
+} */
 
 .lobby {
     margin-bottom: 2%;
@@ -25,4 +23,18 @@ button, input {
     padding-bottom: 3%;
     box-shadow: 2px 2px 2px 2px gray;
     border-radius: 2%;
+}
+
+.row {
+    display: flex;
+  }
+  
+.column {
+    flex: 50%;
+    height: 70vh;
+}
+
+h1 {
+    margin: 0;
+    padding: 20px;
 }

@@ -1,0 +1,21 @@
+#chat {
+  height: 75vh;
+  margin: 0 5vh;
+  overflow-y: scroll;
+  overflow-wrap: break-word;
+  text-align: left;
+  color: white;
+  background-color: #0F4C75;
+}
+
+#chatbar {
+  padding-bottom: 10px;
+}
+
+#chatInput {
+  width: 40vw;
+}
+
+#chat p {
+  padding-left: 10px
+}

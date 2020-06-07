@@ -1,0 +1,7 @@
+#games {
+  overflow-y: scroll;
+  height: 65vh;
+  background-color: #0F4C75;
+  margin: 0 5vh;
+  overflow-y: scroll;
+}

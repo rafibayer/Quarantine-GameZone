@@ -1,9 +1,11 @@
 import React, {Component} from 'react';
+import '../Styles/ChatLobby.css';
 
 class ChatLobby extends Component {
   constructor(props) {
     super(props);
-    this.ws = new WebSocket("wss://api.rafibayer.me:443/ws?auth=" + localStorage.getItem("Authorization")) //CHANGE URL
+    this.ws = new WebSocket("ws://localhost:80/ws?auth=" + localStorage.getItem("Authorization"))
+    // this.ws = new WebSocket("wss://api.rafibayer.me:443/ws?auth=" + localStorage.getItem("Authorization"))
     this.ws.onmessage = (e) => this.handleWs(e)
     this.state = {
       message: "",
@@ -29,10 +31,13 @@ class ChatLobby extends Component {
 
   render() {
     return(
-      <div>
-        <input type="text" id="chatInput" value={this.state.message} onChange={this.handleChange} />
-        <button type="submit" id="chatButton" onClick={this.handleChat}>Chat</button>
-        <div id="chat">{this.state.messages.map(message => <p>{message}</p>)}</div>
+      <div id="chat-outer">
+        <h1>Chat</h1>
+        <div id="chatbar">
+          <input type="text" id="chatInput" value={this.state.message} onChange={this.handleChange} />
+          <button type="submit" id="chatButton" onClick={this.handleChat}>Chat</button>
+        </div>
+        <div id="chat">{this.state.messages.map(message => <p><strong>{message.split(":")[0]}:</strong>{message.split(":")[1]}</p>)}</div>
       </div>
     );
   }

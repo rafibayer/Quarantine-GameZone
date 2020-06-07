@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import api from '../Constants/Endpoints.js'
 import gametypes from '../Constants/GameTypes.js'
 import Errors from './Errors.js'
+import '../Styles/JoinGameLobby.css';
 
 class JoinGameLobby extends Component {
     constructor(props) {
@@ -87,7 +88,7 @@ class JoinGameLobby extends Component {
             <div>
                 <Errors error={error} setError={this.setError} />
                 <h1>Join a Game</h1>
-                <div>{displayGames}</div>
+                <div id="games">{displayGames}</div>
             </div>
 
         );

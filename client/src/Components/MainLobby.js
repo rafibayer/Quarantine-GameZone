@@ -70,11 +70,17 @@ class MainLobby extends Component {
                 <GameLobby setGameLobby={this.setGameLobby} removeGameLobby={this.removeGameLobby} /> 
                 :
                 <div>
-                    <h1>Hello {this.props.player}. Welcome to the Quarantine GameZone Lobby!</h1>
+                    <h1>Welcome to the Quarantine GameZone Lobby, {this.props.player}!</h1>
                     <ExitLobby setAuthToken={this.props.setAuthToken} setPlayer={this.props.setPlayer} setGameLobbyID={this.setGameLobbyID}></ExitLobby>
-                    <CreateGameLobby setGameLobby={this.setGameLobby}></CreateGameLobby>
-                    <JoinGameLobby setGameLobby={this.setGameLobby}></JoinGameLobby>
-                    <ChatLobby setAuthToken={this.props.setAuthToken}></ChatLobby>
+                    <div class="row">
+                    <div class="column">
+                        <CreateGameLobby setGameLobby={this.setGameLobby}></CreateGameLobby>
+                        <JoinGameLobby setGameLobby={this.setGameLobby}></JoinGameLobby>
+                    </div>
+                    <div class="column">
+                        <ChatLobby setAuthToken={this.props.setAuthToken}></ChatLobby>
+                    </div>
+                    </div>
                 </div>
                 }
             </div>

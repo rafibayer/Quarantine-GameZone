@@ -48,7 +48,7 @@ class CreateNickname extends Component {
     render() {
         const { error } = this.state;
         return(
-            <div>
+            <div id="nickname-outer">
                 <Errors error={error} setError={this.setError} />
                 <form>
                     <label for="nickname">Enter a nickname here: </label>
