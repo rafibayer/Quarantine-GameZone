@@ -56,6 +56,12 @@ Our target audience is anyone looking for a way to stay social by playing games,
     - 200: status ok, get game lobby state
     - 401: unauthorized to get a game lobby state, must be a player of the game lobby
     - 500: internal server error
+  - PATCH
+    - 200: removed a player from a specific lobby, lobby deletes if last player
+    - 401: unauthorized game session or must have player session and must be in the game
+    - 500: internal server error
+
+
 
 ### Games
 
